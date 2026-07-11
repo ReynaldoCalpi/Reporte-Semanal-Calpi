@@ -79,11 +79,13 @@ st.sidebar.info("💡 Recuerde dac clic en Consolidar Nuevos Reportes arriba si 
 # ==========================================
 # CONEXIÓN A GOOGLE SHEETS
 # ==========================================
+import pandas as pd
+
 @st.cache_data(ttl=600)
 def cargar_datos():
-    conn = st.connection("gsheets", type=GSheetsConnection)
-    # Reemplaza la URL entre comillas por tu link de Google Sheets
-    df = conn.read(spreadsheet="https://docs.google.com/spreadsheets/d/1ozc9yAbVZ3vEhjJEOuQd2D14vhFd7JFSf6D8Jr2R-OQ/edit?gid=0#gid=0", worksheet="DATA")
+    # Pega aquí el link que copiaste al publicar como CSV
+    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQeRzx7jkJ7S1F-5SzuKG35U8llKKTZ3QxlMyR5rzlN96vANkHWHF4wMcH4eYFt673J9LUnBEoUdXNG/pub?output=csv"
+    df = pd.read_csv(url)
     return df
 
 df_master = cargar_datos()
