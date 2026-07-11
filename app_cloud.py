@@ -71,19 +71,13 @@ if st.sidebar.button("🔄 Consolidar Nuevos Reportes", use_container_width=True
             st.rerun()
 
 st.sidebar.markdown("---")
-st.sidebar.info("💡 Recuerde dac clic en Consolidar Nuevos Reportes arriba si ha hecho algun cambio en ellos.")
+st.sidebar.info("💡 Recuerde dar clic en Consolidar Nuevos Reportes arriba si ha hecho algún cambio en ellos.")
 
 # ==========================================
 # CARGA DE DATOS Y RENDERIZADO DEL DASHBOARD
 # ==========================================
-# ==========================================
-# CONEXIÓN A GOOGLE SHEETS
-# ==========================================
-import pandas as pd
-
 @st.cache_data(ttl=600)
 def cargar_datos():
-    # Pega aquí el link que copiaste al publicar como CSV
     url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQeRzx7jkJ7S1F-5SzuKG35U8llKKTZ3QxlMyR5rzlN96vANkHWHF4wMcH4eYFt673J9LUnBEoUdXNG/pub?output=csv"
     df = pd.read_csv(url)
     return df
@@ -195,7 +189,6 @@ else:
                 df_cajon = df_master[df_master['Categoria'] == cat].copy()
                 cols_finales = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
                 
-                # Formateador de monedas ($$) inteligente
                 formatos_columnas = {}
                 for c in cols_finales:
                     c_low = str(c).lower()
@@ -203,23 +196,18 @@ else:
                         df_cajon[c] = pd.to_numeric(df_cajon[c], errors='coerce').fillna(0)
                         formatos_columnas[c] = st.column_config.NumberColumn(format="$ %,.2f")
                 
-                # --- LIMPIEZA PROFUNDA DE "NONE" Y NULOS ---
                 df_cajon_limpio = df_cajon.copy()
                 for col in df_cajon_limpio.columns:
                     if df_cajon_limpio[col].dtype == object:
                         df_cajon_limpio[col] = df_cajon_limpio[col].replace(['None', 'none', 'NaN', 'nan', '', ' '], pd.NA)
                 
-                # Borra columnas que quedaron 100% nulas/vacías
                 df_cajon_limpio = df_cajon_limpio.dropna(axis=1, how='all')
                 cols_existentes = list(df_cajon_limpio.columns)
-                
-                # Detectar la columna del dinero ($$)
                 col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
                 
                 if col_dinero:
                     df_cajon_limpio = df_cajon_limpio.dropna(subset=[col_dinero])
 
-                # Buscar columnas comunes de forma flexible para mapeos
                 col_fecha = next((c for c in cols_existentes if "fecha" in str(c).lower()), None)
                 col_cliente = next((c for c in cols_existentes if "cliente" in str(c).lower()), None)
                 col_documento = next((c for c in cols_existentes if "documento" in str(c).lower()), None)
@@ -233,37 +221,29 @@ else:
                 cat_str = str(cat).upper().strip()
                 columnas_resumen_vista = []
 
-                # ==================================================================
-                # ORDENACIÓN EN LA VISTA PRINCIPAL SEGÚN REGLAS DE NEGOCIO
-                # ==================================================================
                 if "CONTRUCCIONES" in cat_str or "CONSTRUCCIONES" in cat_str:
                     col_area = next((c for c in cols_existentes if "area" in str(c).lower() or "área" in str(c).lower()), None)
                     if col_area: columnas_resumen_vista.append(col_area)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "CUENTAS POR COBRAR" in cat_str:
                     if col_fecha: columnas_resumen_vista.append(col_fecha)
                     if col_cliente: columnas_resumen_vista.append(col_cliente)
                     if col_documento: columnas_resumen_vista.append(col_documento)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "CUENTAS POR PAGAR" in cat_str:
                     col_proveedor_exacto = next((c for c in cols_existentes if str(c).lower().strip() == "proveedor"), None)
                     if col_fecha: columnas_resumen_vista.append(col_fecha)
                     if col_proveedor_exacto: columnas_resumen_vista.append(col_proveedor_exacto)
                     if col_documento: columnas_resumen_vista.append(col_documento)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "DIESEL" in cat_str:
                     if col_tipo: columnas_resumen_vista.append(col_tipo)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "DISPONIBILIDAD" in cat_str:
                     col_cuenta = next((c for c in cols_existentes if "cuenta" in str(c).lower() or "número" in str(c).lower() or "numero" in str(c).lower()), None)
                     if col_banco: columnas_resumen_vista.append(col_banco)
                     if col_cuenta: columnas_resumen_vista.append(col_cuenta)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "TRANSITO" in cat_str:
                     if col_fecha: columnas_resumen_vista.append(col_fecha)
                     if col_tipo: columnas_resumen_vista.append(col_tipo)
@@ -271,14 +251,12 @@ else:
                     if col_vin: columnas_resumen_vista.append(col_vin)
                     if col_poliza: columnas_resumen_vista.append(col_poliza)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "TRANSPORTE" in cat_str or "TRANNSPORTE" in cat_str or "TRAMITE" in cat_str:
                     col_placa = next((c for c in cols_existentes if "placa" in str(c).lower()), None)
                     if col_tipo: columnas_resumen_vista.append(col_tipo)
                     if col_marca: columnas_resumen_vista.append(col_marca)
                     if col_placa: columnas_resumen_vista.append(col_placa)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "MOBILIARIO" in cat_str or "OFICINA" in cat_str:
                     col_codigo = next((c for c in cols_existentes if "codigo" in str(c).lower() or "código" in str(c).lower()), None)
                     col_desc = next((c for c in cols_existentes if "descripcion" in str(c).lower() or "descripción" in str(c).lower() or "desc" in str(c).lower()), None)
@@ -287,22 +265,18 @@ else:
                     if col_desc: columnas_resumen_vista.append(col_desc)
                     if col_depto: columnas_resumen_vista.append(col_depto)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "PENDIENTES" in cat_str:
                     if col_fecha: columnas_resumen_vista.append(col_fecha)
                     if col_cliente: columnas_resumen_vista.append(col_cliente)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "TERCEROS" in cat_str:
                     col_garantia = next((c for c in cols_existentes if "garantia" in str(c).lower() or "garantía" in str(c).lower()), None)
                     if col_nombre: columnas_resumen_vista.append(col_nombre)
                     if col_garantia: columnas_resumen_vista.append(col_garantia)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "PROYECTOS" in cat_str:
                     if col_nombre: columnas_resumen_vista.append(col_nombre)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "ROTATIVOS" in cat_str or "DECRECIENTES" in cat_str:
                     col_contratado = next((c for c in cols_existentes if "contratado" in str(c).lower()), None)
                     col_disponible = next((c for c in cols_existentes if "disponible" in str(c).lower()), None)
@@ -316,7 +290,6 @@ else:
                     if col_efectiva: columnas_resumen_vista.append(col_efectiva)
                     if col_plazo: columnas_resumen_vista.append(col_plazo)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
                 elif "TERRENOS" in cat_str:
                     col_matricula = next((c for c in cols_existentes if "matricula" in str(c).lower() or "matrícula" in str(c).lower() or "cnr" in str(c).lower()), None)
                     col_terreno = next((c for c in cols_existentes if "terreno" in str(c).lower()), None)
@@ -325,42 +298,37 @@ else:
                     if col_terreno: columnas_resumen_vista.append(col_terreno)
                     if col_compra: columnas_resumen_vista.append(col_compra)
                     if col_dinero: columnas_resumen_vista.append(col_dinero)
-
-                # NUEVA REGLA: Gastos y Agregados muestran todas las columnas que tengan información real
                 elif "AGREGADOS" in cat_str or "GASTOS" in cat_str:
                     columnas_resumen_vista = [c for c in cols_existentes if c not in ['Origen', 'Categoria']]
-                    # Nos aseguramos de que el dinero siempre quede como última columna
                     if col_dinero in columnas_resumen_vista:
                         columnas_resumen_vista.remove(col_dinero)
                         columnas_resumen_vista.append(col_dinero)
-
                 else:
                     if len(cols_finales) > 0:
                         col_texto_inicial = cols_finales[0]
                         columnas_resumen_vista = [col_texto_inicial, col_dinero] if col_texto_inicial != col_dinero else [col_dinero]
 
-                # --- ESCUDO DE SEGURIDAD ---
                 columnas_seguras_vista = [c for c in columnas_resumen_vista if c in df_cajon_limpio.columns]
 
-               if columnas_seguras_vista:
-            	df_temp = df_cajon_limpio[columnas_seguras_vista].copy()
-            	for col in df_temp.columns:
-                	if 'fecha' in col.lower():
-                    		df_temp[col] = pd.to_datetime(df_temp[col], errors='coerce')
-            
-            st.dataframe(
-                df_temp,
-                hide_index=True,
-                use_container_width=True,
-                column_config={
-                    **formatos_columnas,
-                    "Fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY"),
-                }
-            )
+                if columnas_seguras_vista:
+                    df_temp = df_cajon_limpio[columnas_seguras_vista].copy()
+                    for col in df_temp.columns:
+                        if 'fecha' in col.lower():
+                            df_temp[col] = pd.to_datetime(df_temp[col], errors='coerce')
+                    
+                    st.dataframe(
+                        df_temp,
+                        hide_index=True,
+                        use_container_width=True,
+                        column_config={
+                            **formatos_columnas,
+                            "Fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY"),
+                        }
+                    )
 
-        monto_total_cajon = totales_por_categoria.get(cat, 0.0)
-        st.metric(label=f"Total acumulado en {cat}", value=f"${monto_total_cajon:,.2f}")
-                # --- RENDERIZAR DETALLES EXTRA COMPLETOS ---
+                monto_total_cajon = totales_por_categoria.get(cat, 0.0)
+                st.metric(label=f"Total acumulado en {cat}", value=f"${monto_total_cajon:,.2f}")
+                
                 with st.expander(f"🔍 Ver detalles completos de {cat}"):
                     cols_completas_visualizar = [c for c in cols_existentes if c not in ['Origen', 'Categoria']]
                     if col_dinero in cols_completas_visualizar:
