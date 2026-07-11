@@ -342,17 +342,26 @@ else:
                 # --- ESCUDO DE SEGURIDAD ---
                 columnas_seguras_vista = [c for c in columnas_resumen_vista if c in df_cajon_limpio.columns]
 
-                if columnas_seguras_vista:
-                    st.dataframe(
-                        df_cajon_limpio[columnas_seguras_vista], 
-                        hide_index=True, 
-                        use_container_width=True,
-                        column_config=formatos_columnas
-                    )
-                
-                monto_total_cajon = totales_por_categoria.get(cat, 0.0)
-                st.metric(label=f"Total acumulado en {cat}", value=f"$ {monto_total_cajon:,.2f}")
+               if columnas_seguras_vista:
+            # Forzamos la conversión de fechas por seguridad
+            df_temp = df_cajon_limpio[columnas_seguras_vista].copy()
+            for col in df_temp.columns:
+                if 'fecha' in col.lower():
+                    df_temp[col] = pd.to_datetime(df_temp[col], errors='coerce')
 
+            # Mostramos la tabla con el formato corregido
+            st.dataframe(
+                df_temp,
+                hide_index=True,
+                use_container_width=True,
+                column_config={
+                    **formatos_columnas, # Mantiene tus configuraciones previas
+                    "Fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY"),
+                }
+            )
+
+        monto_total_cajon = totales_por_categoria.get(cat, 0.0)
+        st.metric(label=f"Total acumulado en {cat}", value=f"${monto_total_cajon:,.2f}")
                 # --- RENDERIZAR DETALLES EXTRA COMPLETOS ---
                 with st.expander(f"🔍 Ver detalles completos de {cat}"):
                     cols_completas_visualizar = [c for c in cols_existentes if c not in ['Origen', 'Categoria']]
