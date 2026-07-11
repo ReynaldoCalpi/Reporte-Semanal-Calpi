@@ -343,19 +343,17 @@ else:
                 columnas_seguras_vista = [c for c in columnas_resumen_vista if c in df_cajon_limpio.columns]
 
                if columnas_seguras_vista:
-            # Forzamos la conversión de fechas por seguridad
-            df_temp = df_cajon_limpio[columnas_seguras_vista].copy()
-            for col in df_temp.columns:
-                if 'fecha' in col.lower():
-                    df_temp[col] = pd.to_datetime(df_temp[col], errors='coerce')
-
-            # Mostramos la tabla con el formato corregido
+            	df_temp = df_cajon_limpio[columnas_seguras_vista].copy()
+            	for col in df_temp.columns:
+                	if 'fecha' in col.lower():
+                    		df_temp[col] = pd.to_datetime(df_temp[col], errors='coerce')
+            
             st.dataframe(
                 df_temp,
                 hide_index=True,
                 use_container_width=True,
                 column_config={
-                    **formatos_columnas, # Mantiene tus configuraciones previas
+                    **formatos_columnas,
                     "Fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY"),
                 }
             )
