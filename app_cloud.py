@@ -81,7 +81,7 @@ from streamlit_gsheets import GSheetsConnection
 @st.cache_data(ttl=600)
 def cargar_datos():
     conn = st.connection("gsheets", type=GSheetsConnection)
-    df = conn.read(spreadsheet="https://docs.google.com/spreadsheets/d/1ozc9yAbVZ3vEhjJEOuQd2D14vhFd7JFSf6D8Jr2R-OQ/edit", worksheet="DATA")
+    df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQeRzx7jkJ7S1F-5SzuKG35U8llKKTZ3QxlMyR5rzlN96vANkHWHF4wMcH4eYFt673J9LUnBEoUdXNG/pubhtml")
     return df
 
 df_master = cargar_datos()
