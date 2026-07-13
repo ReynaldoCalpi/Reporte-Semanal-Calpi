@@ -85,7 +85,8 @@ def cargar_datos():
     
     # Aquí pegas el link de tu Google Sheet (entre comillas)
     # worksheet="NombreDeTuHoja" es el nombre de la pestaña abajo en el Excel
-    df = conn.read(spreadsheet="1ozc9yAbVZ3vEhjJEOuQd2D14vhFd7JFSf6D8Jr2R-OQ", worksheet="DATA")
+    df = conn.read(spreadsheet="# Cambia tu línea 88 por esta:
+df = conn.read(spreadsheet="https://docs.google.com/spreadsheets/d/1ozc9yAbVZ3vEhjJEOuQd2D14vhFd7JFSf6D8Jr2R-OQ/edit", worksheet="DATA")", worksheet="DATA")
     return df
 
 df_master = cargar_datos()
