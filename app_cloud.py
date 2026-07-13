@@ -1,3 +1,45 @@
+# 1. Definimos el orden que TÚ quieres
+    orden_prioridad = [
+        "Disponibilidad",
+"Prestamos a Terceros",
+"Terrenos Predio Calpi",
+"Cuentas por Cobrar GT",
+"Contrucciones Predio Calpi Oficinas",
+"Cuentas por Cobrar HN",
+"Cuentas por Cobrar NI",
+"Cuentas por Cobrar SV",
+"Diesel en Equipos y Almacenamientos",
+"Equipos de Trannsporte",
+"Equipos de Transporte en Tramite",
+"Equipos de Transporte en Transito",
+"Gastos Anuales El Salvador",
+"Mobiliario y Equipo de oficina",
+"Otros Terrenos y Propiedades",
+"Pendientes de Facturar",
+"Prestamos Rotativos y Decrecientes",
+"Proyectos Calpi",
+"Cuentas por Pagar SV Combustible",
+"Cuentas por Pagar SV",
+"Gastos Mensuales El Salvador",
+"Gastos por Pais y Obligaciones",
+"Transportes Agregados"
+    ]
+
+    # 2. Creamos una función que le asigna un número de orden a cada categoría
+    def obtener_prioridad(cat):
+        for i, prefijo in enumerate(orden_prioridad):
+            if prefijo in cat.upper():
+                return i
+        return 99 # Los que no están en la lista se irán al final automáticamente
+
+    # 3. Ordenamos las categorías usando esa prioridad
+    categorias_ordenadas = sorted(categorias_disponibles, key=obtener_prioridad)
+
+    # 4. Ahora sí, hacemos el loop con el orden correcto
+    for cat in categorias_ordenadas:
+        with st.container(border=True):
+            # ... (todo tu código sigue igual aquí abajo)
+
 import streamlit as st
 import pandas as pd
 import os
