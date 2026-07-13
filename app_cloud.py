@@ -29,8 +29,6 @@ for ruta in rutas_logo:
 
 if logo_encontrado:
     st.sidebar.image("logo.jpg", use_container_width=True)
-else:
-    st.sidebar.image("logo.jpg", width=70)
     
 st.sidebar.header("Panel de Sugerencias")
 
