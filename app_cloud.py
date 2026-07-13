@@ -80,16 +80,11 @@ from streamlit_gsheets import GSheetsConnection
 
 @st.cache_data(ttl=600)
 def cargar_datos():
-    # Creamos la conexión a Google Sheets
     conn = st.connection("gsheets", type=GSheetsConnection)
-    
-    # Aquí pegas el link de tu Google Sheet (entre comillas)
     df = conn.read(spreadsheet="https://docs.google.com/spreadsheets/d/1ozc9yAbVZ3vEhjJEOuQd2D14vhFd7JFSf6D8Jr2R-OQ/edit", worksheet="DATA")
-    
     return df
 
 df_master = cargar_datos()
-
 if df_master.empty:
     st.warning("⚠️ No se encontraron datos consolidados. Presiona el botón de 'Consolidar Nuevos Reportes' a la izquierda.")
 else:
