@@ -13,6 +13,7 @@ RUTA_COMPLETA_EXCEL = os.path.join(CARPETA, ARCHIVO_SALIDA)
 # ==========================================
 # MENÚ LATERAL (CONTROL Y LOGO)
 # ==========================================
+st.sidebar.image("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semanal-Calpi/main/logo.jpg", use_container_width=True)
 st.sidebar.header("Panel de Sugerencias")
 
 st.sidebar.markdown("---")
