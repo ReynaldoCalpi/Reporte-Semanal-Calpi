@@ -26,10 +26,7 @@ for ruta in rutas_logo:
     if os.path.exists(ruta):
         logo_encontrado = ruta
         break
-
-if logo_encontrado:
-    st.sidebar.image("logo.jpg", use_container_width=True)
-    
+  
 st.sidebar.header("Panel de Sugerencias")
 
 st.sidebar.markdown("---")
