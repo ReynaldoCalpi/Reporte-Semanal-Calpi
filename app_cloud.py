@@ -21,6 +21,18 @@ rutas_logo = [
     os.path.join(CARPETA, "logo.JPG")
 ]
 
+logo_encontrado = None
+for ruta in rutas_logo:
+    if os.path.exists(ruta):
+        logo_encontrado = ruta
+        break
+
+if logo_encontrado:
+    st.sidebar.image("logo.jpg", use_container_width=True)
+else:
+    st.sidebar.image("https://cdn-icons-png.flaticon.com/512/3303/3303038.png", width=70)
+    st.sidebar.warning(f"⚠️ No Logo")
+
 st.sidebar.header("Panel de Control")
 
 def consolidar_archivos():
@@ -72,33 +84,20 @@ def cargar_datos():
     df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQeRzx7jkJ7S1F-5SzuKG35U8llKKTZ3QxlMyR5rzlN96vANkHWHF4wMcH4eYFt673J9LUnBEoUdXNG/pub?output=csv")
     return df
 
-# 1. ESTO VA AFUERA: Siempre se mostrará
-st.image("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semanal-Calpi/main/logo.jpg", width=200)
-st.title("📊 Reporte Semanal - Transportes Calpi")
-st.markdown("---")
-
-# 2. LUEGO, cargamos los datos
-# ... (código anterior de logo y título)
-
 df_master = cargar_datos()
-
 if df_master.empty:
-    st.warning("⚠️ No se encontraron datos consolidados.")
+    st.warning("⚠️ No se encontraron datos consolidados. Presiona el botón de 'Consolidar Nuevos Reportes' a la izquierda.")
 else:
-    # 1. Esto te ayudará a ver qué nombres tienes disponibles en pantalla
-    st.write("Columnas detectadas:", df_master.columns.tolist())
-    
-    # 2. Código "a prueba de fallos"
-    nombre_columna_objetivo = 'Categoria' # O el que sea que veas en la lista
-    
-    if nombre_columna_objetivo in df_master.columns:
-        categorias_disponibles = df_master[nombre_columna_objetivo].dropna().unique()
-        st.write(f"Categorías encontradas: {categorias_disponibles}")
+    st.title("📊 Reporte Semanal - Transportes Calpi")
+    st.markdown("---")
+
+    if 'Origen' in df_master.columns:
+        df_master['Categoria'] = df_master['Origen'].str.replace('.xlsx', '', regex=False).str.strip().str.upper()
     else:
-        st.error(f"Error: La columna '{nombre_columna_objetivo}' no existe. Verifica la lista de arriba.")
-        categorias_disponibles = []
-    
-    # ... (el resto de tu código que usa categorias_disponibles)
+        df_master['Categoria'] = 'GENERAL'
+
+    categorias_disponibles = df_master['Categoria'].dropna().unique()
+
     # Pre-calcular totales limpios por cajón
     totales_por_categoria = {}
     for cat in categorias_disponibles:
