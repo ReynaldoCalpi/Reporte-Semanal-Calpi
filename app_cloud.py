@@ -17,44 +17,30 @@ RUTA_COMPLETA_EXCEL = os.path.join(CARPETA, ARCHIVO_SALIDA)
 # ==========================================
 # GESTIÓN DE OBSERVACIONES (PERMANENTES)
 # ==========================================
+# --- BLOQUE DE NOTAS SENCILLO ---
 st.sidebar.markdown("---")
-st.sidebar.subheader("📝 Observaciones (Registro Permanente)")
+st.sidebar.subheader("📝 Notas de Revisión")
 
-# 1. Leer las notas actuales desde Google Sheets
-conn = st.connection("gsheets", type=GSheetsConnection)
-try:
-    df_notas = conn.read(worksheet="Observaciones")
-except:
-    st.sidebar.error("No se pudo leer la hoja 'Observaciones'.")
-    df_notas = pd.DataFrame(columns=["Fecha", "Usuario", "Comentario"])
+if "mis_notas" not in st.session_state:
+    st.session_state.mis_notas = []
 
-# Mostrar notas existentes (invertidas para ver la más reciente arriba)
-if not df_notas.empty:
-    for _, row in df_notas.tail(5).iloc[::-1].iterrows():
-        st.sidebar.caption(f"**{row['Usuario']}** ({row['Fecha']}):\n{row['Comentario']}")
-    st.sidebar.markdown("---")
+# Campo para escribir
+nota_input = st.sidebar.text_area("Escribir observación:", height=100)
 
-# 2. Formulario para nueva nota
-usuario = st.sidebar.text_input("Tu Nombre:")
-nota_input = st.sidebar.text_area("Nueva observación:", height=100)
+if st.sidebar.button("Guardar"):
+    if nota_input:
+        st.session_state.mis_notas.append(nota_input)
+        st.rerun() # Esto actualiza la pantalla para que veas la nota al instante
 
-if st.sidebar.button("Guardar Nota"):
-    if usuario and nota_input:
-        # Crear nueva fila
-        nueva_nota = pd.DataFrame({
-            "Fecha": [pd.Timestamp.now().strftime("%Y-%m-%d %H:%M")],
-            "Usuario": [usuario],
-            "Comentario": [nota_input]
-        })
-        
-        # Unir con las existentes y actualizar el Google Sheet
-        df_actualizado = pd.concat([df_notas, nueva_nota], ignore_index=True)
-        conn.update(worksheet="Observaciones", data=df_actualizado)
-        
-        st.sidebar.success("✅ Nota guardada permanentemente.")
-        st.rerun() # Recargar para ver la nota nueva
-    else:
-        st.sidebar.warning("Completa nombre y observación.")
+# Mostrar las notas
+for i, nota in enumerate(st.session_state.mis_notas):
+    st.sidebar.write(f"{i+1}. {nota}")
+
+# Botón para limpiar cuando ya las hayas revisado
+if st.session_state.mis_notas:
+    if st.sidebar.button("Limpiar Notas (Revisado)"):
+        st.session_state.mis_notas = []
+        st.rerun()
 
 # ==========================================
 # CARGA DE DATOS Y RENDERIZADO DEL DASHBOARD
