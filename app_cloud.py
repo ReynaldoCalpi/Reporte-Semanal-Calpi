@@ -86,7 +86,7 @@ if df_master.empty:
     st.warning("⚠️ No se encontraron datos consolidados.")
 else:
     # Esta línea DEBE tener sangría (espacios a la izquierda) 
-    # para estar dentro del 'else'
+    st.write("Columnas disponibles:", df_master.columns.tolist())
     categorias_disponibles = df_master['Categoria'].dropna().unique()
     
     # ... (el resto de tu código que usa categorias_disponibles)
