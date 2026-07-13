@@ -78,17 +78,18 @@ st.title("📊 Reporte Semanal - Transportes Calpi")
 st.markdown("---")
 
 # 2. LUEGO, cargamos los datos
+# ... (código anterior de logo y título)
+
 df_master = cargar_datos()
 
-# 3. Y finalizamos con la lógica de los datos
 if df_master.empty:
     st.warning("⚠️ No se encontraron datos consolidados.")
 else:
-    # Aquí iría el resto de tu código que muestra los gráficos o tablas
-   st.write("Columnas detectadas:", df_master.columns.tolist())
-
+    # Esta línea DEBE tener sangría (espacios a la izquierda) 
+    # para estar dentro del 'else'
     categorias_disponibles = df_master['Categoria'].dropna().unique()
-
+    
+    # ... (el resto de tu código que usa categorias_disponibles)
     # Pre-calcular totales limpios por cajón
     totales_por_categoria = {}
     for cat in categorias_disponibles:
