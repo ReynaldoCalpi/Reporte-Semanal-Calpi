@@ -8,7 +8,7 @@ st.set_page_config(page_title="Dashboard Financiero Calpi", layout="wide")
 GSHEET_URL = "https://docs.google.com/spreadsheets/d/1ozc9yAbVZ3vEhjJEOuQd2D14vhFd7JFSf6D8Jr2R-OQ/export?format=csv"
 
 # Logo desde GitHub (Asegúrate de que la URL sea la 'Raw' del archivo)
-LOGO_URL = "https://raw.githubusercontent.com/TU_USUARIO/TU_REPO/main/logo.jpg"
+LOGO_URL = "https://github.com/ReynaldoCalpi/Reporte-Semanal-Calpi/blob/main/logo.jpg"
 
 # Sidebar
 st.sidebar.image(LOGO_URL, use_container_width=True)
