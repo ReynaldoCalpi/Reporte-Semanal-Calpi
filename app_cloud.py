@@ -28,7 +28,7 @@ for ruta in rutas_logo:
         break
 
 if logo_encontrado:
-    st.sidebar.image(logo_encontrado, use_container_width=True)
+    st.sidebar.image("logo.jpg", use_container_width=True)
 else:
     st.sidebar.image("https://cdn-icons-png.flaticon.com/512/3303/3303038.png", width=70)
     st.sidebar.warning(f"⚠️ No se encontró el archivo logo.(png/jpg) en la ruta:\n{CARPETA}")
