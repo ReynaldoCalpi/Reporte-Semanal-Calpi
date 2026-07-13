@@ -21,18 +21,6 @@ rutas_logo = [
     os.path.join(CARPETA, "logo.JPG")
 ]
 
-logo_encontrado = None
-for ruta in rutas_logo:
-    if os.path.exists(ruta):
-        logo_encontrado = ruta
-        break
-
-if logo_encontrado:
-    st.sidebar.image("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semanal-Calpi/main/logo.jpg", use_container_width=True)
-else:
-    st.sidebar.image("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semanal-Calpi/main/logo.jpg", width=70)
-    st.sidebar.warning(f"⚠️ No Logo")
-
 st.sidebar.header("Panel de Control")
 
 def consolidar_archivos():
