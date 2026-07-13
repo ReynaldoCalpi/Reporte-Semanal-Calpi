@@ -13,13 +13,6 @@ RUTA_COMPLETA_EXCEL = os.path.join(CARPETA, ARCHIVO_SALIDA)
 # ==========================================
 # MENÚ LATERAL (CONTROL Y LOGO)
 # ==========================================
-rutas_logo = [
-    os.path.join(CARPETA, "logo.png"),
-    os.path.join(CARPETA, "logo.jpg"),
-    os.path.join(CARPETA, "logo.jpeg"),
-    os.path.join(CARPETA, "logo.PNG"),
-    os.path.join(CARPETA, "logo.JPG")
-]
 
 st.sidebar.header("Panel de Sugerencias")
 
