@@ -30,7 +30,7 @@ for ruta in rutas_logo:
 if logo_encontrado:
     st.sidebar.image("logo.jpg", use_container_width=True)
 else:
-    st.sidebar.image("https://github.com/ReynaldoCalpi/Reporte-Semanal-Calpi/blob/main/logo.jpg", width=70)
+    st.sidebar.image("logo.jpg", width=70)
     
 st.sidebar.header("Panel de Sugerencias")
 
@@ -69,6 +69,7 @@ df_master = cargar_datos()
 if df_master.empty:
     st.warning("⚠️ Por Favor utilizar este espacio para anotar obervaciones, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
 else:
+    st.sidebar.image("https://github.com/ReynaldoCalpi/Reporte-Semanal-Calpi/blob/main/logo.jpg", width=70)
     st.title("📊 Reporte Semanal - Transportes Calpi")
     st.markdown("---")
 
