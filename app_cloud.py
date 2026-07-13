@@ -88,6 +88,8 @@ def cargar_datos():
     df = conn.read(spreadsheet="https://docs.google.com/spreadsheets/d/1ozc9yAbVZ3vEhjJEOuQd2D14vhFd7JFSf6D8Jr2R-OQ/edit?gid=0#gid=0", worksheet="DATA")
     return df
 
+df_master = cargar_datos()
+
 if df_master.empty:
     st.warning("⚠️ No se encontraron datos consolidados. Presiona el botón de 'Consolidar Nuevos Reportes' a la izquierda.")
 else:
