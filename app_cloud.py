@@ -13,29 +13,47 @@ RUTA_COMPLETA_EXCEL = os.path.join(CARPETA, ARCHIVO_SALIDA)
 # ==========================================
 # MENÚ LATERAL (CONTROL Y LOGO)
 # ==========================================
-st.sidebar.image("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semanal-Calpi/main/logo.jpg", use_container_width=True)
-st.sidebar.header("Panel de Sugerencias")
-
+# ==========================================
+# GESTIÓN DE OBSERVACIONES (PERMANENTES)
+# ==========================================
 st.sidebar.markdown("---")
-st.sidebar.info("💡Por Favor utilizar este espacio para anotar obervaciones, sugerencias y mejoras para poder evacuarlas en proximas entregas.")
-if "notas_calpi" not in st.session_state:
-    st.session_state.notas_calpi = []
+st.sidebar.subheader("📝 Observaciones (Registro Permanente)")
 
-# Campo para escribir
+# 1. Leer las notas actuales desde Google Sheets
+conn = st.connection("gsheets", type=GSheetsConnection)
+try:
+    df_notas = conn.read(worksheet="Observaciones")
+except:
+    st.sidebar.error("No se pudo leer la hoja 'Observaciones'.")
+    df_notas = pd.DataFrame(columns=["Fecha", "Usuario", "Comentario"])
+
+# Mostrar notas existentes (invertidas para ver la más reciente arriba)
+if not df_notas.empty:
+    for _, row in df_notas.tail(5).iloc[::-1].iterrows():
+        st.sidebar.caption(f"**{row['Usuario']}** ({row['Fecha']}):\n{row['Comentario']}")
+    st.sidebar.markdown("---")
+
+# 2. Formulario para nueva nota
+usuario = st.sidebar.text_input("Tu Nombre:")
 nota_input = st.sidebar.text_area("Nueva observación:", height=100)
 
 if st.sidebar.button("Guardar Nota"):
-    if nota_input:
-        st.session_state.notas_calpi.append(nota_input)
-        st.sidebar.success("Nota guardada.")
+    if usuario and nota_input:
+        # Crear nueva fila
+        nueva_nota = pd.DataFrame({
+            "Fecha": [pd.Timestamp.now().strftime("%Y-%m-%d %H:%M")],
+            "Usuario": [usuario],
+            "Comentario": [nota_input]
+        })
+        
+        # Unir con las existentes y actualizar el Google Sheet
+        df_actualizado = pd.concat([df_notas, nueva_nota], ignore_index=True)
+        conn.update(worksheet="Observaciones", data=df_actualizado)
+        
+        st.sidebar.success("✅ Nota guardada permanentemente.")
+        st.rerun() # Recargar para ver la nota nueva
     else:
-        st.sidebar.warning("Escribe algo primero.")
-
-# Mostrar notas acumuladas
-if st.session_state.notas_calpi:
-    st.sidebar.write("**Notas pendientes:**")
-    for idx, n in enumerate(st.session_state.notas_calpi):
-        st.sidebar.info(f"{idx+1}. {n}")
+        st.sidebar.warning("Completa nombre y observación.")
 
 # ==========================================
 # CARGA DE DATOS Y RENDERIZADO DEL DASHBOARD
