@@ -68,7 +68,7 @@ def cargar_datos():
 
 df_master = cargar_datos()
 if df_master.empty:
-    st.warning("⚠️ No se encontraron datos consolidados. Presiona el botón de 'Consolidar Nuevos Reportes' a la izquierda.")
+    st.warning("⚠️ Por Favor utilizar este espacio para anotar obervaciones, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
 else:
     st.title("📊 Reporte Semanal - Transportes Calpi")
     st.markdown("---")
