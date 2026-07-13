@@ -85,9 +85,18 @@ df_master = cargar_datos()
 if df_master.empty:
     st.warning("⚠️ No se encontraron datos consolidados.")
 else:
-    # Esta línea DEBE tener sangría (espacios a la izquierda) 
-    st.write("Columnas disponibles:", df_master.columns.tolist())
-    categorias_disponibles = df_master['Categoria'].dropna().unique()
+    # 1. Esto te ayudará a ver qué nombres tienes disponibles en pantalla
+    st.write("Columnas detectadas:", df_master.columns.tolist())
+    
+    # 2. Código "a prueba de fallos"
+    nombre_columna_objetivo = 'Categoria' # O el que sea que veas en la lista
+    
+    if nombre_columna_objetivo in df_master.columns:
+        categorias_disponibles = df_master[nombre_columna_objetivo].dropna().unique()
+        st.write(f"Categorías encontradas: {categorias_disponibles}")
+    else:
+        st.error(f"Error: La columna '{nombre_columna_objetivo}' no existe. Verifica la lista de arriba.")
+        categorias_disponibles = []
     
     # ... (el resto de tu código que usa categorias_disponibles)
     # Pre-calcular totales limpios por cajón
