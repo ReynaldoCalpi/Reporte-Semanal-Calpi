@@ -21,12 +21,6 @@ rutas_logo = [
     os.path.join(CARPETA, "logo.JPG")
 ]
 
-logo_encontrado = None
-for ruta in rutas_logo:
-    if os.path.exists(ruta):
-        logo_encontrado = ruta
-        break
-  
 st.sidebar.header("Panel de Sugerencias")
 
 st.sidebar.markdown("---")
