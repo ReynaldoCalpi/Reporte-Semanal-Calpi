@@ -1,4 +1,3 @@
-from streamlit_gsheets import GSheetsConnection
 import streamlit as st
 import pandas as pd
 import os
@@ -14,34 +13,28 @@ RUTA_COMPLETA_EXCEL = os.path.join(CARPETA, ARCHIVO_SALIDA)
 # ==========================================
 # MENÚ LATERAL (CONTROL Y LOGO)
 # ==========================================
-# ==========================================
-# GESTIÓN DE OBSERVACIONES (PERMANENTES)
-# ==========================================
-# --- BLOQUE DE NOTAS SENCILLO ---
-st.sidebar.markdown("---")
-st.sidebar.subheader("📝 Notas de Revisión")
+st.sidebar.header("Panel de Sugerencias")
 
-if "mis_notas" not in st.session_state:
-    st.session_state.mis_notas = []
+st.sidebar.markdown("---")
+st.sidebar.info("💡Por Favor utilizar este espacio para anotar obervaciones, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
+if "notas_calpi" not in st.session_state:
+    st.session_state.notas_calpi = []
 
 # Campo para escribir
-nota_input = st.sidebar.text_area("Escribir observación:", height=100)
+nota_input = st.sidebar.text_area("Nueva observación:", height=100)
 
-if st.sidebar.button("Guardar"):
+if st.sidebar.button("Guardar Nota"):
     if nota_input:
-        st.session_state.mis_notas.append(nota_input)
-        st.rerun() # Esto actualiza la pantalla para que veas la nota al instante
+        st.session_state.notas_calpi.append(nota_input)
+        st.sidebar.success("Nota guardada.")
+    else:
+        st.sidebar.warning("Escribe algo primero.")
 
-# Mostrar las notas
-for i, nota in enumerate(st.session_state.mis_notas):
-    st.sidebar.write(f"{i+1}. {nota}")
-
-# Botón para limpiar cuando ya las hayas revisado
-if st.session_state.mis_notas:
-    if st.sidebar.button("Limpiar Notas (Revisado)"):
-        st.session_state.mis_notas = []
-        st.rerun()
-
+# Mostrar notas acumuladas
+if st.session_state.notas_calpi:
+    st.sidebar.write("**Notas pendientes:**")
+    for idx, n in enumerate(st.session_state.notas_calpi):
+        st.sidebar.info(f"{idx+1}. {n}")
 # ==========================================
 # CARGA DE DATOS Y RENDERIZADO DEL DASHBOARD
 # ==========================================
