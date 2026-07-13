@@ -28,11 +28,11 @@ for ruta in rutas_logo:
         break
 
 if logo_encontrado:
-    st.sidebar.image("https://github.com/ReynaldoCalpi/Reporte-Semanal-Calpi/blob/main/logo.jpg", use_container_width=True)
+    st.sidebar.image("logo.jpg", use_container_width=True)
 else:
     st.sidebar.image("https://github.com/ReynaldoCalpi/Reporte-Semanal-Calpi/blob/main/logo.jpg", width=70)
     
-st.sidebar.header("Panel de Control")
+st.sidebar.header("Panel de Sugerencias")
 
 st.sidebar.markdown("---")
 st.sidebar.info("💡Por Favor utilizar este espacio para anotar obervaciones, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
