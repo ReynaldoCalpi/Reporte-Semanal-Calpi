@@ -72,18 +72,20 @@ def cargar_datos():
     df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQeRzx7jkJ7S1F-5SzuKG35U8llKKTZ3QxlMyR5rzlN96vANkHWHF4wMcH4eYFt673J9LUnBEoUdXNG/pub?output=csv")
     return df
 
-df_master = cargar_datos()
-if df_master.empty:
-    st.warning("⚠️ No se encontraron datos consolidados. Presiona el botón de 'Consolidar Nuevos Reportes' a la izquierda.")
-    
-    st.image("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semanal-Calpi/main/logo.jpg", width=200)
-    st.title("📊 Reporte Semanal - Transportes Calpi")
-    st.markdown("---")
+# 1. ESTO VA AFUERA: Siempre se mostrará
+st.image("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semanal-Calpi/main/logo.jpg", width=200)
+st.title("📊 Reporte Semanal - Transportes Calpi")
+st.markdown("---")
 
-    if 'Origen' in df_master.columns:
-        df_master['Categoria'] = df_master['Origen'].str.replace('.xlsx', '', regex=False).str.strip().str.upper()
-    else:
-        df_master['Categoria'] = 'GENERAL'
+# 2. LUEGO, cargamos los datos
+df_master = cargar_datos()
+
+# 3. Y finalizamos con la lógica de los datos
+if df_master.empty:
+    st.warning("⚠️ No se encontraron datos consolidados.")
+else:
+    # Aquí iría el resto de tu código que muestra los gráficos o tablas
+    st.write("¡Datos cargados con éxito!")
 
     categorias_disponibles = df_master['Categoria'].dropna().unique()
 
