@@ -88,6 +88,7 @@ df_master = cargar_datos()
 if df_master.empty:
     st.warning("⚠️ No se encontraron datos consolidados. Presiona el botón de 'Consolidar Nuevos Reportes' a la izquierda.")
 else:
+    st.logo("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semanal-Calpi/main/logo.jpg")
     st.title("📊 Reporte Semanal - Transportes Calpi")
     st.markdown("---")
 
