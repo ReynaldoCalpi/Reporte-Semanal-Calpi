@@ -76,7 +76,6 @@ df_master = cargar_datos()
 if df_master.empty:
     st.warning("⚠️ No se encontraron datos consolidados. Presiona el botón de 'Consolidar Nuevos Reportes' a la izquierda.")
 else:
-    # Creamos 3 columnas: la del medio será la protagonista
 col1, col2, col3 = st.columns([1, 2, 1])
 
 with col2:
