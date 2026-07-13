@@ -13,7 +13,6 @@ RUTA_COMPLETA_EXCEL = os.path.join(CARPETA, ARCHIVO_SALIDA)
 # ==========================================
 # MENÚ LATERAL (CONTROL Y LOGO)
 # ==========================================
-st.sidebar.image("https://github.com/ReynaldoCalpi/Reporte-Semanal-Calpi/blob/main/logo.jpg", width=70)
 st.sidebar.header("Panel de Sugerencias")
 
 st.sidebar.markdown("---")
@@ -51,7 +50,6 @@ df_master = cargar_datos()
 if df_master.empty:
     st.warning("⚠️ Por Favor utilizar este espacio para anotar obervaciones, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
 else:
-    st.sidebar.image("https://github.com/ReynaldoCalpi/Reporte-Semanal-Calpi/blob/main/logo.jpg", width=70)
     st.title("📊 Reporte Semanal - Transportes Calpi")
     st.markdown("---")
 
