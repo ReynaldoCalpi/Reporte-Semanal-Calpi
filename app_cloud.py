@@ -37,14 +37,6 @@ if st.session_state.notas_calpi:
     for idx, n in enumerate(st.session_state.notas_calpi):
         st.sidebar.info(f"{idx+1}. {n}")
 
-# En la barra lateral, debajo del bloc de notas
-st.sidebar.markdown("---")
-st.sidebar.subheader("🔍 Filtros de Visualización")
-categorias_seleccionadas = st.sidebar.multiselect(
-    "Seleccionar Categorías a ver:",
-    options=categorias_disponibles,
-    default=categorias_disponibles # Por defecto selecciona todas
-)
 # ==========================================
 # CARGA DE DATOS Y RENDERIZADO DEL DASHBOARD
 # ==========================================
