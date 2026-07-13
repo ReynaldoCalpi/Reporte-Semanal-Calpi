@@ -35,44 +35,26 @@ else:
 
 st.sidebar.header("Panel de Control")
 
-def consolidar_archivos():
-    dataframes = []
-    if not os.path.exists(CARPETA):
-        st.sidebar.error("❌ La ruta de la carpeta no existe. Revisa la dirección.")
-        return False
-        
-    for archivo in os.listdir(CARPETA):
-        if archivo.endswith('.xlsx') and archivo != ARCHIVO_SALIDA:
-            try:
-                ruta_completa = os.path.join(CARPETA, archivo)
-                df_temp = pd.read_excel(ruta_completa)
-                df_temp['Origen'] = archivo
-                dataframes.append(df_temp)
-            except Exception as e:
-                st.sidebar.error(f"Error leyendo {archivo}: {e}")
-
-    if dataframes:
-        try:
-            reporte_final = pd.concat(dataframes, ignore_index=True)
-            with pd.ExcelWriter(RUTA_COMPLETA_EXCEL, engine='xlsxwriter') as writer:
-                reporte_final.to_excel(writer, sheet_name='DATA', index=False)
-                pd.DataFrame().to_excel(writer, sheet_name='DASHBOARD')
-            return True
-        except PermissionError:
-            st.sidebar.error("❌ ¡ERROR DE PERMISOS! Por favor, CIERRA el archivo 'Reporte_Consolidado_Final.xlsx' en Excel e intenta de nuevo.")
-            return False
-    return False
-
-if st.sidebar.button("🔄 Consolidar Nuevos Reportes", use_container_width=True):
-    with st.spinner("Procesando archivos..."):
-        if consolidar_archivos():
-            st.sidebar.success("¡Consolidación exitosa!")
-            st.cache_data.clear()
-            st.rerun()
-
 st.sidebar.markdown("---")
 st.sidebar.info("💡 Recuerde dac clic en Consolidar Nuevos Reportes arriba si ha hecho algun cambio en ellos.")
+if "notas_calpi" not in st.session_state:
+    st.session_state.notas_calpi = []
 
+# Campo para escribir
+nota_input = st.sidebar.text_area("Nueva observación:", height=100)
+
+if st.sidebar.button("Guardar Nota"):
+    if nota_input:
+        st.session_state.notas_calpi.append(nota_input)
+        st.sidebar.success("Nota guardada.")
+    else:
+        st.sidebar.warning("Escribe algo primero.")
+
+# Mostrar notas acumuladas
+if st.session_state.notas_calpi:
+    st.sidebar.write("**Notas pendientes:**")
+    for idx, n in enumerate(st.session_state.notas_calpi):
+        st.sidebar.info(f"{idx+1}. {n}")
 # ==========================================
 # CARGA DE DATOS Y RENDERIZADO DEL DASHBOARD
 # ==========================================
