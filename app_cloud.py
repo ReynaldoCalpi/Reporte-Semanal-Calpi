@@ -36,7 +36,7 @@ else:
 st.sidebar.header("Panel de Control")
 
 st.sidebar.markdown("---")
-st.sidebar.info("💡 Recuerde dac clic en Consolidar Nuevos Reportes arriba si ha hecho algun cambio en ellos.")
+st.sidebar.info("💡Por Favor utilizar este espacio para anotar obervaciones, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
 if "notas_calpi" not in st.session_state:
     st.session_state.notas_calpi = []
 
