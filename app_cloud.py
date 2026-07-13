@@ -85,7 +85,7 @@ if df_master.empty:
     st.warning("⚠️ No se encontraron datos consolidados.")
 else:
     # Aquí iría el resto de tu código que muestra los gráficos o tablas
-    st.write("¡Datos cargados con éxito!")
+   st.write("Columnas detectadas:", df_master.columns.tolist())
 
     categorias_disponibles = df_master['Categoria'].dropna().unique()
 
