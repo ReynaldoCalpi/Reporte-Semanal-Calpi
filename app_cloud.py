@@ -1,33 +1,45 @@
-# 1. Definimos el orden
+if df_master.empty:
+    st.warning("⚠️ No se encontraron datos consolidados.")
+else:
+    # --- AQUÍ EMPIEZA LA INDENTACIÓN (4 espacios) ---
     orden_prioridad = [
-        "Disponibilidad", "Prestamos a Terceros", "Terrenos Predio Calpi", 
-        "Cuentas por Cobrar GT", "Contrucciones Predio Calpi Oficinas", 
-        "Cuentas por Cobrar HN", "Cuentas por Cobrar NI", "Cuentas por Cobrar SV", 
-        "Diesel en Equipos y Almacenamientos", "Equipos de Trannsporte", 
-        "Equipos de Transporte en Tramite", "Equipos de Transporte en Transito", 
-        "Gastos Anuales El Salvador", "Mobiliario y Equipo de oficina", 
-        "Otros Terrenos y Propiedades", "Pendientes de Facturar", 
-        "Prestamos Rotativos y Decrecientes", "Proyectos Calpi", 
-        "Cuentas por Pagar SV Combustible", "Cuentas por Pagar SV", 
-        "Gastos Mensuales El Salvador", "Gastos por Pais y Obligaciones", 
+        "Disponibilidad", 
+        "Prestamos a Terceros", 
+        "Terrenos Predio Calpi", 
+        "Cuentas por Cobrar GT", 
+        "Contrucciones Predio Calpi Oficinas", 
+        "Cuentas por Cobrar HN", 
+        "Cuentas por Cobrar NI", 
+        "Cuentas por Cobrar SV", 
+        "Diesel en Equipos y Almacenamientos", 
+        "Equipos de Trannsporte", 
+        "Equipos de Transporte en Tramite", 
+        "Equipos de Transporte en Transito", 
+        "Gastos Anuales El Salvador", 
+        "Mobiliario y Equipo de oficina", 
+        "Otros Terrenos y Propiedades", 
+        "Pendientes de Facturar", 
+        "Prestamos Rotativos y Decrecientes", 
+        "Proyectos Calpi", 
+        "Cuentas por Pagar SV Combustible", 
+        "Cuentas por Pagar SV", 
+        "Gastos Mensuales El Salvador", 
+        "Gastos por Pais y Obligaciones", 
         "Transportes Agregados"
     ]
 
-    # 2. Corregimos la función (Añadimos .upper() a prefijo)
     def obtener_prioridad(cat):
         for i, prefijo in enumerate(orden_prioridad):
-            # AQUÍ ESTABA EL ERROR: Comparar ambos en mayúsculas
-            if prefijo.upper() in cat.upper(): 
+            if prefijo.upper() in cat.upper():
                 return i
         return 99
 
-    # 3. Ordenamos
     categorias_ordenadas = sorted(categorias_disponibles, key=obtener_prioridad)
 
-    # 4. Loop
+    # Ahora el ciclo for usa la lista ordenada
     for cat in categorias_ordenadas:
         with st.container(border=True):
-            # ... (tu código sigue aquí)
+            # ... (el resto de tu código aquí)
            
 import streamlit as st
 import pandas as pd
