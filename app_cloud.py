@@ -6,7 +6,7 @@ import os
 st.set_page_config(page_title="Dashboard Financiero Calpi", layout="wide")
 
 # Rutas de trabajo fijas
-CARPETA = r'C:\Users\rorantes\OneDrive - TRANSPORTES CALPI\Escritorio\Reporte Consolidado CC'
+CARPETA = r'https://docs.google.com/spreadsheets/d/1ozc9yAbVZ3vEhjJEOuQd2D14vhFd7JFSf6D8Jr2R-OQ/edit?gid=0#gid=0'
 ARCHIVO_SALIDA = 'Reporte_Consolidado_Final.xlsx'
 RUTA_COMPLETA_EXCEL = os.path.join(CARPETA, ARCHIVO_SALIDA)
 
