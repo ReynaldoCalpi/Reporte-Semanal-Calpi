@@ -28,7 +28,7 @@ for ruta in rutas_logo:
         break
 
 if logo_encontrado:
-    st.sidebar.image("https://github.com/ReynaldoCalpi/Reporte-Semanal-Calpi/blob/main/logo.jpg", use_container_width=True)
+    st.sidebar.image("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semanal-Calpi/main/logo.jpg", use_container_width=True)
 else:
     st.sidebar.image("https://github.com/ReynaldoCalpi/Reporte-Semanal-Calpi/blob/main/logo.jpg", width=70)
     st.sidebar.warning(f"⚠️ No Logo")
