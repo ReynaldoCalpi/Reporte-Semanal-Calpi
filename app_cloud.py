@@ -237,7 +237,26 @@ else:
             if col_dinero and col_dinero in columnas_finales:
                 columnas_finales.remove(col_dinero)
                 columnas_finales.append(col_dinero)
+            # ... (código anterior donde calculas columnas_finales) ...
             
+            # --- AQUÍ VA EL BLOQUE DE LIMPIEZA ---
+            for col in columnas_finales:
+                # Si la columna contiene números, forzamos el tipo
+                if col in [col_dinero] or any(k in str(col).lower() for k in ['monto', 'saldo', 'valor', 'total']):
+                    df_cajon[col] = pd.to_numeric(df_cajon[col], errors='coerce').fillna(0)
+                else:
+                    # Si no es numérica, aseguramos que sea string para evitar errores
+                    df_cajon[col] = df_cajon[col].astype(str).replace('nan', '')
+            
+            # 6. Renderizado final
+            if columnas_finales:
+                st.dataframe(
+                    df_cajon[columnas_finales], 
+                    hide_index=True, 
+                    use_container_width=True,
+                    column_config=formatos_columnas
+                )
+            # ... (el resto de tu código) ...
             # --- Visualización ---
             if columnas_finales:
                 st.dataframe(
