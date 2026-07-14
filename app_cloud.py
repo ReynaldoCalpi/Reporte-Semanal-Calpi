@@ -148,13 +148,20 @@ else:
         st.header("📋 Resumen Consolidado")
         
         # --- ACTIVOS ---
+        # --- ACTIVOS ---
         with st.container(border=True):
             st.subheader("🟢 Activos")
             for cat in lista_activos:
                 saldo = totales_por_categoria.get(cat, 0.0)
                 if saldo != 0:
-                    if st.button(f"{cat}\n${saldo:,.2f}", use_container_width=True, key=f"btn_{cat}"):
-                        st.session_state.cat_seleccionada = cat
+                    # Creamos las dos columnas
+                    col1, col2 = st.columns([0.7, 0.3])
+                    with col1:
+                        if st.button(cat, use_container_width=True, key=f"btn_{cat}"):
+                            st.session_state.cat_seleccionada = cat
+                    with col2:
+                        # Alineamos el número a la derecha
+                        st.markdown(f"<div style='text-align: right; padding-top: 10px;'><b>${saldo:,.2f}</b></div>", unsafe_allow_html=True)
             
             total_activos = sum(totales_por_categoria.get(cat, 0.0) for cat in lista_activos)
             st.metric("TOTAL ACTIVOS", f"$ {total_activos:,.2f}")
@@ -165,12 +172,19 @@ else:
             for cat in lista_pasivos:
                 saldo = totales_por_categoria.get(cat, 0.0)
                 if saldo != 0:
-                    if st.button(f"{cat}\n${saldo:,.2f}", use_container_width=True, key=f"btn_{cat}"):
-                        st.session_state.cat_seleccionada = cat
+                    # Creamos las dos columnas
+                    col1, col2 = st.columns([0.7, 0.3])
+                    with col1:
+                        if st.button(cat, use_container_width=True, key=f"btn_{cat}"):
+                            st.session_state.cat_seleccionada = cat
+                    with col2:
+                        # Alineamos el número a la derecha
+                        st.markdown(f"<div style='text-align: right; padding-top: 10px;'><b>${saldo:,.2f}</b></div>", unsafe_allow_html=True)
                 
             total_pasivos = sum(totales_por_categoria.get(cat, 0.0) for cat in lista_pasivos)
             st.metric("TOTAL PASIVOS", f"$ {total_pasivos:,.2f}")        
-      
+
+        # --- PATRIMONIO (Se mantiene igual) ---
         with st.container(border=True):
             st.subheader("🔵 Patrimonio Consolidado")
             patrimonio = total_activos - total_pasivos
