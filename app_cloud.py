@@ -49,7 +49,7 @@ def cargar_datos():
 
 df_master = cargar_datos()
 if df_master.empty:
-    st.warning("⚠️ Por Favor utilizar este espacio para anotar obervaciones, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
+    st.warning("⚠️Anotar obervaciones, sugerencias y mejoras.")
 else:
     st.title("📊 Reporte Semanal - Transportes Calpi")
     st.markdown("---")
@@ -351,17 +351,5 @@ else:
                 monto_total_cajon = totales_por_categoria.get(cat, 0.0)
                 st.metric(label=f"Total acumulado en {cat}", value=f"$ {monto_total_cajon:,.2f}")
 
-                # --- RENDERIZAR DETALLES EXTRA COMPLETOS ---
-                with st.expander(f"🔍 Ver detalles completos de {cat}"):
-                    cols_completas_visualizar = [c for c in cols_existentes if c not in ['Origen', 'Categoria']]
-                    if col_dinero in cols_completas_visualizar:
-                        cols_completas_visualizar.remove(col_dinero)
-                        cols_completas_visualizar.append(col_dinero)
-
-                    st.dataframe(
-                        df_cajon_limpio[cols_completas_visualizar], 
-                        hide_index=True, 
-                        use_container_width=True,
-                        column_config=formatos_columnas
-                    )
+             
 
