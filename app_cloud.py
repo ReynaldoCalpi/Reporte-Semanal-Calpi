@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import json
 FILE_NOTAS = "notas_reporte.json"
 
 def cargar_notas():
