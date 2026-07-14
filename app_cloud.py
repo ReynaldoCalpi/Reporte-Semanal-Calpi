@@ -146,7 +146,31 @@ else:
     with col_derecha:
         st.header("📑 Detalle por Rubro")
         
-        for cat in categorias_disponibles:
+        # Definimos el orden de prioridad
+        orden_prioridad = [
+            "Disponibilidad", "Prestamos a Terceros", "Terrenos Predio Calpi", 
+            "Cuentas por Cobrar GT", "Contrucciones Predio Calpi Oficinas", 
+            "Cuentas por Cobrar HN", "Cuentas por Cobrar NI", "Cuentas por Cobrar SV", 
+            "Diesel en Equipos y Almacenamientos", "Equipos de Trannsporte", 
+            "Equipos de Transporte en Tramite", "Equipos de Transporte en Transito", 
+            "Gastos Anuales El Salvador", "Mobiliario y Equipo de oficina", 
+            "Otros Terrenos y Propiedades", "Pendientes de Facturar", 
+            "Prestamos Rotativos y Decrecientes", "Proyectos Calpi", 
+            "Cuentas por Pagar SV Combustible", "Cuentas por Pagar SV", 
+            "Gastos Mensuales El Salvador", "Gastos por Pais y Obligaciones", 
+            "Transportes Agregados"
+        ]
+
+        def obtener_prioridad(cat):
+            for i, prefijo in enumerate(orden_prioridad):
+                if prefijo.upper() in cat.upper():
+                    return i
+            return 99
+
+        categorias_ordenadas = sorted(categorias_disponibles, key=obtener_prioridad)
+        
+        # EL FOR DEBE ESTAR ALINEADO IGUAL QUE LAS LÍNEAS DE ARRIBA
+        for cat in categorias_ordenadas:
             with st.container(border=True):
                 st.subheader(f"🔹 {cat}")
                 
