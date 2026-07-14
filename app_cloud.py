@@ -182,38 +182,39 @@ else:
             cols_existentes = list(df_cajon_limpio.columns)
             col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
 
-            # 3. LÓGICA DE FILTRADO (Tus reglas)
-            # Intentamos usar tus reglas originales
+            # --- 3. LÓGICA DE COLUMNAS (Control estricto) ---
             cat_str = str(cat).upper().strip()
             columnas_resumen_vista = []
             
-            # [PEGA AQUÍ TUS REGLAS IF/ELIF QUE YA TENÍAS] 
-            # ... (Toda la lógica de if "CONSTRUCCIONES" etc. va aquí) ...
-
-            # 4. SEGURIDAD A PRUEBA DE ERRORES
-            # Si después de las reglas no tenemos columnas, mostramos TODO (fail-safe)
-            columnas_seguras = [c for c in columnas_resumen_vista if c in df_cajon_limpio.columns]
+            # [AQUÍ VAN TUS REGLAS ORIGINALES]
+            # (Asegúrate de que tus if/elif llenen la lista 'columnas_resumen_vista')
+            if "CONTRUCCIONES" in cat_str or "CONSTRUCCIONES" in cat_str:
+                col_area = next((c for c in cols_existentes if "area" in str(c).lower() or "área" in str(c).lower()), None)
+                if col_area: columnas_resumen_vista.append(col_area)
+                if col_dinero: columnas_resumen_vista.append(col_dinero)
+            elif "CUENTAS POR COBRAR" in cat_str:
+                if col_fecha: columnas_resumen_vista.append(col_fecha)
+                if col_cliente: columnas_resumen_vista.append(col_cliente)
+                if col_documento: columnas_resumen_vista.append(col_documento)
+                if col_dinero: columnas_resumen_vista.append(col_dinero)
+            # ... (Tus otros elif aquí) ...
             
-            if len(columnas_seguras) > 0:
-                st.dataframe(
-                    df_cajon_limpio[columnas_seguras], 
-                    hide_index=True, 
-                    use_container_width=True,
-                    column_config=formatos_columnas
-                )
-            else:
-                # Si las reglas fallaron, mostramos todo el dataframe para que no quede vacío
-                st.warning("Nota: Mostrando vista completa (reglas de columna no aplicadas).")
-                st.dataframe(
-                    df_cajon_limpio, 
-                    hide_index=True, 
-                    use_container_width=True,
-                    column_config=formatos_columnas
-                )
+            # --- 4. SEGURIDAD: SI NO HAY REGLAS, USAR POR DEFECTO ---
+            # Si columnas_resumen_vista sigue vacía, tomamos solo la primera columna disponible y el dinero
+            if not columnas_resumen_vista:
+                columnas_resumen_vista = [cols_existentes[0]]
+                if col_dinero and col_dinero != cols_existentes[0]:
+                    columnas_resumen_vista.append(col_dinero)
             
-            # 5. Total y Botón
-            st.metric(label=f"Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
+            # --- 5. RENDERIZADO FINAL (Sin avisos molestos) ---
+            st.dataframe(
+                df_cajon_limpio[columnas_resumen_vista], 
+                hide_index=True, 
+                use_container_width=True,
+                column_config=formatos_columnas
+            )
             
+            st.metric(label=f"Total {cat}", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")            
             if st.button("❌ Cerrar vista actual"):
                 st.session_state.cat_seleccionada = None
                 st.rerun()
