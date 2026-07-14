@@ -259,7 +259,7 @@ else:
             
             # El total lo tomamos de tu variable de totales
             st.metric(label=f"Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
-            else:
+            
             cat = st.session_state.cat_seleccionada
             st.subheader(f"🔹 Detalle: {cat}")
             
