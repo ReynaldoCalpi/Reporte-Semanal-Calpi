@@ -177,47 +177,60 @@ else:
             st.metric("DIFERENCIA ENTRE ACTIVOS Y PASIVOS", f"$ {patrimonio:,.2f}")
 
     # ==========================================
-    # LADO DERECHO: LÓGICA ADMINISTRABLE
+    # LADO DERECHO: DETALLE DINÁMICO
     # ==========================================
     with col_derecha:
-        # ... (Tu header y control de selección inicial) ...
+        st.header("📑 Detalle por Rubro")
         
-        # 1. Obtenemos columnas definidas en el ADMIN, si no existen, usamos todas
-        columnas_resumen_vista = CONFIG_ADMIN.get(cat, cols_existentes)
-        
-        # 2. Filtrado inteligente de columnas vacías (para no mostrar basura)
-        # Solo conservamos columnas que tienen al menos un dato, 
-        # PERO mantenemos las definidas en el CONFIG_ADMIN aunque estén vacías (por si quieres ver el campo vacío)
-        columnas_finales = [
-            c for c in columnas_resumen_vista 
-            if c in df_cajon.columns and (c in CONFIG_ADMIN.get(cat, []) or df_cajon[c].notna().any())
-        ]
-        
-        # 3. Anclaje de Dinero (La columna $$ siempre al final)
-        if col_dinero in columnas_finales:
-            columnas_finales.remove(col_dinero)
-            columnas_finales.append(col_dinero)
+        # Primero verificamos si hay algo seleccionado
+        if st.session_state.cat_seleccionada is None:
+            st.info("👈 Selecciona una cuenta en la izquierda.")
+        else:
+            # Ahora entramos en el 'else' donde está toda la lógica
+            cat = st.session_state.cat_seleccionada
+            st.subheader(f"🔹 Detalle: {cat}")
             
-        # 4. Renderizado Final
-        if columnas_finales:
-            st.dataframe(
-                df_cajon[columnas_finales], 
-                hide_index=True, 
-                use_container_width=True,
-                column_config=formatos_columnas
-            )
-        # ... (Resto del código) ...
+            # 1. Preparamos los datos
+            df_cajon = df_master[df_master['Categoria'] == cat].copy()
+            cols_existentes = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
+            
+            # 2. Inicializamos formatos y dinero (Esto evita el NameError)
+            formatos_columnas = {} 
+            col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
+            
+            for c in cols_existentes:
+                c_low = str(c).lower()
+                if "$$" in c_low or any(k in c_low for k in ['contratado', 'disponible', 'monto', 'saldo', 'valor']):
+                    df_cajon[c] = pd.to_numeric(df_cajon[c], errors='coerce').fillna(0)
+                    formatos_columnas[c] = st.column_config.NumberColumn(format="$ %,.2f")
 
-            # 5. RENDERIZADO FINAL
-            columnas_finales = [c for c in columnas_resumen_vista if c in df_cajon.columns]
+            # 3. Lógica Administrable (Lee del diccionario CONFIG_ADMIN que pusiste arriba)
+            # Nota: Asegúrate de que CONFIG_ADMIN esté definido al principio de tu archivo .py
+            columnas_resumen_vista = CONFIG_ADMIN.get(cat, cols_existentes)
             
-            st.dataframe(
-                df_cajon[columnas_finales], 
-                hide_index=True, 
-                use_container_width=True,
-                column_config=formatos_columnas # Ya existe, así que no dará error
-            )
+            # 4. Filtrado inteligente: Mantiene solo las columnas existentes y con datos
+            columnas_finales = [
+                c for c in columnas_resumen_vista 
+                if c in df_cajon.columns and (c == col_dinero or df_cajon[c].notna().any())
+            ]
             
+            # 5. Anclaje de Dinero (Siempre al final)
+            if col_dinero and col_dinero in columnas_finales:
+                columnas_finales.remove(col_dinero)
+                columnas_finales.append(col_dinero)
+            
+            # 6. Renderizado final
+            if columnas_finales:
+                st.dataframe(
+                    df_cajon[columnas_finales], 
+                    hide_index=True, 
+                    use_container_width=True,
+                    column_config=formatos_columnas
+                )
+            else:
+                st.warning("No hay datos para mostrar.")
+            
+            # El total lo tomamos de tu variable de totales
             st.metric(label=f"Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
             
             if st.button("❌ Cerrar vista actual"):
