@@ -255,36 +255,42 @@ else:
                     column_config=formatos_columnas
                 )
             else:
-                st.warning("No hay datos para mostrar.")
-            
-            # El total lo tomamos de tu variable de totales
-            st.metric(label=f"Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
-            
             cat = st.session_state.cat_seleccionada
             st.subheader(f"🔹 Detalle: {cat}")
             
-            # ... [Tus pasos 1 al 6 quedan igual] ...
-            # ... (código existente hasta el st.dataframe o el warning) ...
-
-            # El total lo tomamos de tu variable de totales
+            # 1. Preparamos los datos
+            df_cajon = df_master[df_master['Categoria'] == cat].copy()
+            cols_existentes = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
+            
+            # ... (aquí va tu lógica de formatos, que ya tienes) ...
+            
+            # 6. Renderizado final
+            if columnas_finales:
+                st.dataframe(
+                    df_cajon[columnas_finales], 
+                    hide_index=True, 
+                    use_container_width=True,
+                    column_config=formatos_columnas
+                )
+            else:
+                st.warning("No hay datos para mostrar.")
+            
+            # --- AQUÍ VA EL ÚNICO TOTAL ---
             st.metric(label=f"Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
             
-            # --- SECCIÓN DE NOTAS (Pégalo aquí) ---
+            # --- AHORA VIENEN LAS NOTAS ---
             st.divider()
             st.subheader("📝 Observaciones")
             
-            # Cargamos notas actuales
             todas_las_notas = cargar_notas()
             nota_actual = todas_las_notas.get(cat, "")
             
-            # Área de escritura
-            nueva_nota = st.text_area("Escribe tus comentarios para esta cuenta:", value=nota_actual, key=f"notas_{cat}")
+            nueva_nota = st.text_area("Escribe tus comentarios:", value=nota_actual, key=f"notas_{cat}")
             
             if st.button("💾 Guardar Nota"):
                 guardar_nota(cat, nueva_nota)
                 st.success("Nota guardada correctamente.")
 
-            # Botón de Descarga
             if os.path.exists(FILE_NOTAS):
                 with open(FILE_NOTAS, "r") as f:
                     data_json = f.read()
@@ -294,11 +300,7 @@ else:
                     file_name="mis_observaciones.json",
                     mime="application/json"
                 )
-            # --- FIN DE SECCIÓN DE NOTAS ---
             
-            if st.button("❌ Cerrar vista actual"):
-                st.session_state.cat_seleccionada = None
-                st.rerun()
             if st.button("❌ Cerrar vista actual"):
                 st.session_state.cat_seleccionada = None
                 st.rerun()
