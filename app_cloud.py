@@ -67,16 +67,9 @@ st.sidebar.image("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semana
 st.sidebar.header("Panel de Sugerencias")
 
 st.sidebar.markdown("---")
-st.sidebar.info("💡Por Favor utilizar el espacio para anotar obervaciones, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
+st.sidebar.info("💡Por Favor utilizar el espacio de observaciones bajo cada rubro, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
 if "notas_calpi" not in st.session_state:
     st.session_state.notas_calpi = []
-
-if st.sidebar.button("Guardar Nota"):
-    if nota_input:
-        st.session_state.notas_calpi.append(nota_input)
-        st.sidebar.success("Nota guardada.")
-    else:
-        st.sidebar.warning("Escribe algo primero.")
 
 # Mostrar notas acumuladas
 if st.session_state.notas_calpi:
