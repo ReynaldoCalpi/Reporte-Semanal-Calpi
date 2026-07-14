@@ -150,7 +150,7 @@ else:
             st.metric("DIFERENCIA ENTRE ACTIVOS Y PASIVOS", f"$ {patrimonio:,.2f}")
 
     # ==========================================
-    # LADO DERECHO: DETALLE DINÁMICO (VERSIÓN INTELIGENTE)
+    # LADO DERECHO: DETALLE DINÁMICO (LIMPIO)
     # ==========================================
     with col_derecha:
         st.header("📑 Detalle por Rubro")
@@ -161,49 +161,51 @@ else:
             cat = st.session_state.cat_seleccionada
             st.subheader(f"🔹 Detalle: {cat}")
             
-            # --- 1. PREPARACIÓN ---
+            # --- 1. PREPARACIÓN Y LIMPIEZA INICIAL ---
             df_cajon = df_master[df_master['Categoria'] == cat].copy()
-            cols_existentes = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
             
-            # Formateador de monedas
-            formatos_columnas = {}
-            col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
-            for c in cols_existentes:
+            # Convertir valores a numéricos donde sea posible
+            cols_todas = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
+            for c in cols_todas:
                 c_low = str(c).lower()
                 if "$$" in c_low or any(k in c_low for k in ['contratado', 'disponible', 'monto', 'saldo', 'valor']):
-                    df_cajon[c] = pd.to_numeric(df_cajon[c], errors='coerce').fillna(0)
-                    formatos_columnas[c] = st.column_config.NumberColumn(format="$ %,.2f")
+                    df_cajon[c] = pd.to_numeric(df_cajon[c], errors='coerce')
             
-            # --- 2. LÓGICA DE COLUMNAS ---
-            # Identificamos columnas clave
-            col_fecha = next((c for c in cols_existentes if "fecha" in str(c).lower()), None)
-            col_cliente = next((c for c in cols_existentes if "cliente" in str(c).lower()), None)
-            # ... (Tus otras variables col_...)
+            # Reemplazar Nulos, None, y vacíos por pd.NA
+            df_cajon = df_cajon.replace(['None', 'none', 'NaN', 'nan', '', ' ', 0], pd.NA)
             
+            # Eliminar columnas y filas que estén 100% vacías
+            df_cajon = df_cajon.dropna(axis=1, how='all')
+            df_cajon = df_cajon.dropna(axis=0, how='all')
+            
+            cols_existentes = list(df_cajon.columns)
+            col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
+
+            # --- 2. LÓGICA DE COLUMNAS (Tus reglas) ---
             cat_str = str(cat).upper().strip()
             columnas_resumen_vista = []
             
             # [PEGA AQUÍ TUS REGLAS IF/ELIF ORIGINALES]
-            # Ejemplo: if "CONTRUCCIONES" in cat_str: ...
+            # ... (Tus reglas para CONSTRUCCIONES, CUENTAS POR COBRAR, etc.) ...
             
-            # --- 3. RED DE SEGURIDAD (ESTO CORRIGE TU PROBLEMA) ---
-            # Si después de las reglas no tenemos columnas (o solo tenemos la de dinero),
-            # agregamos todas las columnas que existen en el dataframe para no perder info.
-            if len(columnas_resumen_vista) <= 1: 
-                columnas_resumen_vista = cols_existentes
+            # --- 3. FILTRO DE SEGURIDAD FINAL ---
+            # Si las reglas no devolvieron nada, mostramos solo las columnas que tienen datos reales
+            if not columnas_resumen_vista:
+                columnas_resumen_vista = [c for c in cols_existentes if c not in ['Origen', 'Categoria']]
             
-            # Aseguramos que el dinero vaya al final si existe
-            if col_dinero and col_dinero in columnas_resumen_vista:
-                columnas_resumen_vista.remove(col_dinero)
-                columnas_resumen_vista.append(col_dinero)
-
-            # --- 4. RENDERIZADO FINAL ---
-            st.dataframe(
-                df_cajon[columnas_resumen_vista], 
-                hide_index=True, 
-                use_container_width=True,
-                column_config=formatos_columnas
-            )
+            # --- 4. RENDERIZADO FINAL SIN VACÍOS ---
+            # Filtramos para que solo pasen las columnas seleccionadas y sin filas vacías
+            df_final = df_cajon[columnas_resumen_vista].dropna(axis=1, how='all').dropna(axis=0, how='all')
+            
+            if not df_final.empty:
+                st.dataframe(
+                    df_final, 
+                    hide_index=True, 
+                    use_container_width=True,
+                    column_config=formatos_columnas # Asegúrate de definir esto arriba igual que antes
+                )
+            else:
+                st.warning("No hay datos disponibles para mostrar en este rubro.")
             
             st.metric(label=f"Total {cat}", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
             
