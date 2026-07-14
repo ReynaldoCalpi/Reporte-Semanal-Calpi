@@ -10,7 +10,7 @@ CONFIG_ADMIN = {
     "CUENTAS POR COBRAR GT": ["Fecha", "Cliente","Documento", "$$"],
     "CONTRUCCIONES PREDIO CALPI OFICINAS": ["AREA", "$$"],
     "CUENTAS POR COBRAR HN": ["FECHA", "CLIENTE","DOCUMENTO", "$$"],
-    "CUENTAS POR COBRAR NI": ["FECHA", "CLIENTE","DOCUMENTO", "$$"],
+    "CUENTAS POR COBRAR NI": ["Fecha", "Cliente","Documento", "$$"],
     "CUENTAS POR COBRAR SV": ["CLIENTE","$$"],
     "DIESEL EN EQUIPOS Y ALMACENAMIENTOS": ["TIPO", "COSTO GALON DE DIESEL", "$$"],
     "EQUIPOS DE TRANNSPORTE": ["TIPO", "MARCA", "PLACA", "$$"],
