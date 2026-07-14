@@ -149,6 +149,9 @@ else:
             patrimonio = total_activos - total_pasivos
             st.metric("DIFERENCIA ENTRE ACTIVOS Y PASIVOS", f"$ {patrimonio:,.2f}")
 
+    # ==========================================
+    # LADO DERECHO: DETALLE DINÁMICO
+    # ==========================================
     with col_derecha:
         st.header("📑 Detalle por Rubro")
         
@@ -161,43 +164,42 @@ else:
             # 1. Preparación de datos
             df_cajon = df_master[df_master['Categoria'] == cat].copy()
             cols_existentes = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
+            
+            # --- INICIALIZACIÓN DE FORMATOS (Aquí corregimos el NameError) ---
+            formatos_columnas = {} 
             col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
             
-            # --- 2. TUS REGLAS IF/ELIF (Mantén aquí tu lógica) ---
+            for c in cols_existentes:
+                c_low = str(c).lower()
+                if "$$" in c_low or any(k in c_low for k in ['contratado', 'disponible', 'monto', 'saldo', 'valor']):
+                    df_cajon[c] = pd.to_numeric(df_cajon[c], errors='coerce').fillna(0)
+                    formatos_columnas[c] = st.column_config.NumberColumn(format="$ %,.2f")
+            
+            # --- 2. TUS REGLAS IF/ELIF ---
+            # (Pega aquí tu lógica de columnas_resumen_vista)
             cat_str = str(cat).upper().strip()
             columnas_resumen_vista = []
-            # ... (Tus bloques IF/ELIF llenando la lista columnas_resumen_vista) ...
-            
+            # ... [TUS REGLAS AQUÍ] ...
+
             # 3. SEGURIDAD: Si no hay reglas, mostramos las que tienen datos
             if not columnas_resumen_vista:
                 columnas_resumen_vista = [c for c in cols_existentes if df_cajon[c].notna().any()]
 
-            # --- 4. LÓGICA DE ORDEN: DINERO AL FINAL DE LAS VISIBLES ---
-            # Si el dinero está en la lista, lo quitamos para volver a ponerlo al final
+            # 4. ORDEN: Dinero al final de las visibles
             if col_dinero and col_dinero in columnas_resumen_vista:
                 columnas_resumen_vista.remove(col_dinero)
-            
-            # Lo agregamos al final de la lista de visualización
             if col_dinero:
                 columnas_resumen_vista.append(col_dinero)
 
-            # --- 5. LIMPIEZA DE VACÍAS ---
-            # Solo conservamos columnas que tengan datos (excepto la de dinero, que siempre queremos verla)
-            columnas_finales = [
-                c for c in columnas_resumen_vista 
-                if c in df_cajon.columns and (c == col_dinero or df_cajon[c].notna().any())
-            ]
-
-            # --- 6. RENDERIZADO FINAL ---
-            if columnas_finales:
-                st.dataframe(
-                    df_cajon[columnas_finales], 
-                    hide_index=True, 
-                    use_container_width=True,
-                    column_config=formatos_columnas
-                )
-            else:
-                st.warning("No hay datos con contenido para mostrar en este rubro.")
+            # 5. RENDERIZADO FINAL
+            columnas_finales = [c for c in columnas_resumen_vista if c in df_cajon.columns]
+            
+            st.dataframe(
+                df_cajon[columnas_finales], 
+                hide_index=True, 
+                use_container_width=True,
+                column_config=formatos_columnas # Ya existe, así que no dará error
+            )
             
             st.metric(label=f"Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
             
