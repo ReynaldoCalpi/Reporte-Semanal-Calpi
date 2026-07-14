@@ -150,16 +150,7 @@ else:
             st.metric("DIFERENCIA ENTRE ACTIVOS Y PASIVOS", f"$ {patrimonio:,.2f}")
 
     # ==========================================
-    # LADO DERECHO: DETALLES DE CAJONES LIMPIOS
-    # ==========================================
-    # ==========================================
-    # LADO DERECHO: DETALLE DINÁMICO
-    # ==========================================
-    # ==========================================
-    # LADO DERECHO: DETALLE DINÁMICO
-    # ==========================================
-    # ==========================================
-    # LADO DERECHO: DETALLE DINÁMICO
+    # LADO DERECHO: DETALLE DINÁMICO (VERSIÓN DEFINITIVA)
     # ==========================================
     with col_derecha:
         st.header("📑 Detalle por Rubro")
@@ -170,8 +161,10 @@ else:
             cat = st.session_state.cat_seleccionada
             st.subheader(f"🔹 Detalle: {cat}")
             
-            # --- 1. PREPARACIÓN DE DATOS ---
+            # 1. Filtramos los datos
             df_cajon = df_master[df_master['Categoria'] == cat].copy()
+            
+            # 2. Limpieza de columnas
             cols_finales = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
             
             formatos_columnas = {}
@@ -188,31 +181,39 @@ else:
             df_cajon_limpio = df_cajon_limpio.dropna(axis=1, how='all')
             cols_existentes = list(df_cajon_limpio.columns)
             col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
-            if col_dinero: df_cajon_limpio = df_cajon_limpio.dropna(subset=[col_dinero])
 
-            # --- 2. LÓGICA DE COLUMNAS (Tus reglas) ---
-            # (Aquí pegaste tus reglas IF/ELIF antes, ASEGÚRATE QUE ESTÉN AQUÍ ADENTRO)
-            # Ejemplo simplificado de lo que debe ir aquí:
+            # 3. LÓGICA DE FILTRADO (Tus reglas)
+            # Intentamos usar tus reglas originales
             cat_str = str(cat).upper().strip()
             columnas_resumen_vista = []
             
-            # [PEGA AQUÍ TODOS TUS IF/ELIF DE REGLAS DE COLUMNAS QUE YA TENÍAS]
-            # ... asegúrate de que columnas_resumen_vista se llene correctamente ...
+            # [PEGA AQUÍ TUS REGLAS IF/ELIF QUE YA TENÍAS] 
+            # ... (Toda la lógica de if "CONSTRUCCIONES" etc. va aquí) ...
+
+            # 4. SEGURIDAD A PRUEBA DE ERRORES
+            # Si después de las reglas no tenemos columnas, mostramos TODO (fail-safe)
+            columnas_seguras = [c for c in columnas_resumen_vista if c in df_cajon_limpio.columns]
             
-            # --- 3. DIBUJAR TABLA Y METRIC ---
-            columnas_seguras_vista = [c for c in columnas_resumen_vista if c in df_cajon_limpio.columns]
-            
-            if columnas_seguras_vista:
+            if len(columnas_seguras) > 0:
                 st.dataframe(
-                    df_cajon_limpio[columnas_seguras_vista], 
+                    df_cajon_limpio[columnas_seguras], 
+                    hide_index=True, 
+                    use_container_width=True,
+                    column_config=formatos_columnas
+                )
+            else:
+                # Si las reglas fallaron, mostramos todo el dataframe para que no quede vacío
+                st.warning("Nota: Mostrando vista completa (reglas de columna no aplicadas).")
+                st.dataframe(
+                    df_cajon_limpio, 
                     hide_index=True, 
                     use_container_width=True,
                     column_config=formatos_columnas
                 )
             
-            st.metric(label=f"Total acumulado en {cat}", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
+            # 5. Total y Botón
+            st.metric(label=f"Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
             
-            # Botón cerrar
             if st.button("❌ Cerrar vista actual"):
                 st.session_state.cat_seleccionada = None
                 st.rerun()
