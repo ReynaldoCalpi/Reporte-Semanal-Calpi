@@ -11,7 +11,7 @@ CONFIG_ADMIN = {
     "CONTRUCCIONES PREDIO CALPI OFICINAS": ["AREA", "$$"],
     "CUENTAS POR COBRAR HN": ["Fecha", "Cliente","Documento", "$$"],
     "CUENTAS POR COBRAR NI": ["Fecha", "Cliente","Documento", "$$"],
-    "CUENTAS POR COBRAR SV": ["CLIENTE","$$"],
+    "CUENTAS POR COBRAR SV": ["Cliente","$$"],
     "DIESEL EN EQUIPOS Y ALMACENAMIENTOS": ["TIPO", "COSTO GALON DE DIESEL", "$$"],
     "EQUIPOS DE TRANNSPORTE": ["TIPO", "MARCA", "PLACA", "$$"],
     "EQUIPOS DE TRANSPORTE EN TRAMITE": ["MARCA", "VIN", "POLIZA", "$$"],
