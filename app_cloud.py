@@ -6,8 +6,13 @@ FILE_NOTAS = "notas_reporte.json"
 
 def cargar_notas():
     if os.path.exists(FILE_NOTAS):
-        with open(FILE_NOTAS, "r") as f:
-            return json.load(f)
+        try:
+            with open(FILE_NOTAS, "r") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, ValueError):
+            # Si el archivo está vacío o corrupto, devolvemos un diccionario vacío 
+            # para que la app no se detenga
+            return {}
     return {}
 
 def guardar_nota(cat, texto):
