@@ -1,6 +1,19 @@
 import streamlit as st
 import pandas as pd
 import os
+FILE_NOTAS = "notas_reporte.json"
+
+def cargar_notas():
+    if os.path.exists(FILE_NOTAS):
+        with open(FILE_NOTAS, "r") as f:
+            return json.load(f)
+    return {}
+
+def guardar_nota(cat, texto):
+    notas = cargar_notas()
+    notas[cat] = texto
+    with open(FILE_NOTAS, "w") as f:
+        json.dump(notas, f)
 # --- CAPA DE ADMINISTRACIÓN DE FORMATOS ---
 # Si no está aquí, el sistema usará las columnas que tengan datos.
 CONFIG_ADMIN = {
@@ -246,7 +259,46 @@ else:
             
             # El total lo tomamos de tu variable de totales
             st.metric(label=f"Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
+            else:
+            cat = st.session_state.cat_seleccionada
+            st.subheader(f"🔹 Detalle: {cat}")
             
+            # ... [Tus pasos 1 al 6 quedan igual] ...
+            # ... (código existente hasta el st.dataframe o el warning) ...
+
+            # El total lo tomamos de tu variable de totales
+            st.metric(label=f"Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
+            
+            # --- SECCIÓN DE NOTAS (Pégalo aquí) ---
+            st.divider()
+            st.subheader("📝 Observaciones")
+            
+            # Cargamos notas actuales
+            todas_las_notas = cargar_notas()
+            nota_actual = todas_las_notas.get(cat, "")
+            
+            # Área de escritura
+            nueva_nota = st.text_area("Escribe tus comentarios para esta cuenta:", value=nota_actual, key=f"notas_{cat}")
+            
+            if st.button("💾 Guardar Nota"):
+                guardar_nota(cat, nueva_nota)
+                st.success("Nota guardada correctamente.")
+
+            # Botón de Descarga
+            if os.path.exists(FILE_NOTAS):
+                with open(FILE_NOTAS, "r") as f:
+                    data_json = f.read()
+                st.download_button(
+                    label="📥 Descargar todas las observaciones",
+                    data=data_json,
+                    file_name="mis_observaciones.json",
+                    mime="application/json"
+                )
+            # --- FIN DE SECCIÓN DE NOTAS ---
+            
+            if st.button("❌ Cerrar vista actual"):
+                st.session_state.cat_seleccionada = None
+                st.rerun()
             if st.button("❌ Cerrar vista actual"):
                 st.session_state.cat_seleccionada = None
                 st.rerun()
