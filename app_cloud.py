@@ -208,20 +208,20 @@ else:
     # ==========================================
     with col_derecha:
         st.header("📑 Detalle por Rubro")
-        
-        # Primero verificamos si hay algo seleccionado
+
+        # 1. Verificación de selección
         if st.session_state.cat_seleccionada is None:
             st.info("👈 Selecciona una cuenta en la izquierda.")
+        
         else:
-            # Ahora entramos en el 'else' donde está toda la lógica
+            # Todo esto debe estar indentado (con espacio a la izquierda)
             cat = st.session_state.cat_seleccionada
             st.subheader(f"🔹 Detalle: {cat}")
             
-            # 1. Preparamos los datos
+            # --- Lógica de datos ---
             df_cajon = df_master[df_master['Categoria'] == cat].copy()
             cols_existentes = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
             
-            # 2. Inicializamos formatos y dinero (Esto evita el NameError)
             formatos_columnas = {} 
             col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
             
@@ -231,40 +231,18 @@ else:
                     df_cajon[c] = pd.to_numeric(df_cajon[c], errors='coerce').fillna(0)
                     formatos_columnas[c] = st.column_config.NumberColumn(format="$ %,.2f")
 
-            # 3. Lógica Administrable (Lee del diccionario CONFIG_ADMIN que pusiste arriba)
-            # Nota: Asegúrate de que CONFIG_ADMIN esté definido al principio de tu archivo .py
             columnas_resumen_vista = CONFIG_ADMIN.get(cat, cols_existentes)
             
-            # 4. Filtrado inteligente: Mantiene solo las columnas existentes y con datos
             columnas_finales = [
                 c for c in columnas_resumen_vista 
                 if c in df_cajon.columns and (c == col_dinero or df_cajon[c].notna().any())
             ]
             
-            # 5. Anclaje de Dinero (Siempre al final)
             if col_dinero and col_dinero in columnas_finales:
                 columnas_finales.remove(col_dinero)
                 columnas_finales.append(col_dinero)
             
-            # 6. Renderizado final
-            if columnas_finales:
-                st.dataframe(
-                    df_cajon[columnas_finales], 
-                    hide_index=True, 
-                    use_container_width=True,
-                    column_config=formatos_columnas
-                )
-            else:
-            cat = st.session_state.cat_seleccionada
-            st.subheader(f"🔹 Detalle: {cat}")
-            
-            # 1. Preparamos los datos
-            df_cajon = df_master[df_master['Categoria'] == cat].copy()
-            cols_existentes = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
-            
-            # ... (aquí va tu lógica de formatos, que ya tienes) ...
-            
-            # 6. Renderizado final
+            # --- Visualización ---
             if columnas_finales:
                 st.dataframe(
                     df_cajon[columnas_finales], 
@@ -275,16 +253,14 @@ else:
             else:
                 st.warning("No hay datos para mostrar.")
             
-            # --- AQUÍ VA EL ÚNICO TOTAL ---
-            st.metric(label=f"Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
+            # --- Total ---
+            st.metric(label="Total acumulado", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
             
-            # --- AHORA VIENEN LAS NOTAS ---
+            # --- Notas ---
             st.divider()
             st.subheader("📝 Observaciones")
-            
             todas_las_notas = cargar_notas()
             nota_actual = todas_las_notas.get(cat, "")
-            
             nueva_nota = st.text_area("Escribe tus comentarios:", value=nota_actual, key=f"notas_{cat}")
             
             if st.button("💾 Guardar Nota"):
@@ -294,13 +270,9 @@ else:
             if os.path.exists(FILE_NOTAS):
                 with open(FILE_NOTAS, "r") as f:
                     data_json = f.read()
-                st.download_button(
-                    label="📥 Descargar todas las observaciones",
-                    data=data_json,
-                    file_name="mis_observaciones.json",
-                    mime="application/json"
-                )
+                st.download_button("📥 Descargar observaciones", data=data_json, file_name="mis_observaciones.json", mime="application/json")
             
+            # --- Botón Cerrar ---
             if st.button("❌ Cerrar vista actual"):
                 st.session_state.cat_seleccionada = None
                 st.rerun()
