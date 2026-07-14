@@ -150,7 +150,7 @@ else:
             st.metric("DIFERENCIA ENTRE ACTIVOS Y PASIVOS", f"$ {patrimonio:,.2f}")
 
     # ==========================================
-    # LADO DERECHO: DETALLE DINÁMICO (VERSIÓN DEFINITIVA)
+    # LADO DERECHO: DETALLE DINÁMICO (VERSIÓN INTELIGENTE)
     # ==========================================
     with col_derecha:
         st.header("📑 Detalle por Rubro")
@@ -161,60 +161,52 @@ else:
             cat = st.session_state.cat_seleccionada
             st.subheader(f"🔹 Detalle: {cat}")
             
-            # 1. Filtramos los datos
+            # --- 1. PREPARACIÓN ---
             df_cajon = df_master[df_master['Categoria'] == cat].copy()
+            cols_existentes = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
             
-            # 2. Limpieza de columnas
-            cols_finales = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
-            
+            # Formateador de monedas
             formatos_columnas = {}
-            for c in cols_finales:
+            col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
+            for c in cols_existentes:
                 c_low = str(c).lower()
                 if "$$" in c_low or any(k in c_low for k in ['contratado', 'disponible', 'monto', 'saldo', 'valor']):
                     df_cajon[c] = pd.to_numeric(df_cajon[c], errors='coerce').fillna(0)
                     formatos_columnas[c] = st.column_config.NumberColumn(format="$ %,.2f")
             
-            df_cajon_limpio = df_cajon.copy()
-            for col in df_cajon_limpio.columns:
-                if df_cajon_limpio[col].dtype == object:
-                    df_cajon_limpio[col] = df_cajon_limpio[col].replace(['None', 'none', 'NaN', 'nan', '', ' '], pd.NA)
-            df_cajon_limpio = df_cajon_limpio.dropna(axis=1, how='all')
-            cols_existentes = list(df_cajon_limpio.columns)
-            col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
-
-            # --- 3. LÓGICA DE COLUMNAS (Control estricto) ---
+            # --- 2. LÓGICA DE COLUMNAS ---
+            # Identificamos columnas clave
+            col_fecha = next((c for c in cols_existentes if "fecha" in str(c).lower()), None)
+            col_cliente = next((c for c in cols_existentes if "cliente" in str(c).lower()), None)
+            # ... (Tus otras variables col_...)
+            
             cat_str = str(cat).upper().strip()
             columnas_resumen_vista = []
             
-            # [AQUÍ VAN TUS REGLAS ORIGINALES]
-            # (Asegúrate de que tus if/elif llenen la lista 'columnas_resumen_vista')
-            if "CONTRUCCIONES" in cat_str or "CONSTRUCCIONES" in cat_str:
-                col_area = next((c for c in cols_existentes if "area" in str(c).lower() or "área" in str(c).lower()), None)
-                if col_area: columnas_resumen_vista.append(col_area)
-                if col_dinero: columnas_resumen_vista.append(col_dinero)
-            elif "CUENTAS POR COBRAR" in cat_str:
-                if col_fecha: columnas_resumen_vista.append(col_fecha)
-                if col_cliente: columnas_resumen_vista.append(col_cliente)
-                if col_documento: columnas_resumen_vista.append(col_documento)
-                if col_dinero: columnas_resumen_vista.append(col_dinero)
-            # ... (Tus otros elif aquí) ...
+            # [PEGA AQUÍ TUS REGLAS IF/ELIF ORIGINALES]
+            # Ejemplo: if "CONTRUCCIONES" in cat_str: ...
             
-            # --- 4. SEGURIDAD: SI NO HAY REGLAS, USAR POR DEFECTO ---
-            # Si columnas_resumen_vista sigue vacía, tomamos solo la primera columna disponible y el dinero
-            if not columnas_resumen_vista:
-                columnas_resumen_vista = [cols_existentes[0]]
-                if col_dinero and col_dinero != cols_existentes[0]:
-                    columnas_resumen_vista.append(col_dinero)
+            # --- 3. RED DE SEGURIDAD (ESTO CORRIGE TU PROBLEMA) ---
+            # Si después de las reglas no tenemos columnas (o solo tenemos la de dinero),
+            # agregamos todas las columnas que existen en el dataframe para no perder info.
+            if len(columnas_resumen_vista) <= 1: 
+                columnas_resumen_vista = cols_existentes
             
-            # --- 5. RENDERIZADO FINAL (Sin avisos molestos) ---
+            # Aseguramos que el dinero vaya al final si existe
+            if col_dinero and col_dinero in columnas_resumen_vista:
+                columnas_resumen_vista.remove(col_dinero)
+                columnas_resumen_vista.append(col_dinero)
+
+            # --- 4. RENDERIZADO FINAL ---
             st.dataframe(
-                df_cajon_limpio[columnas_resumen_vista], 
+                df_cajon[columnas_resumen_vista], 
                 hide_index=True, 
                 use_container_width=True,
                 column_config=formatos_columnas
             )
             
-            st.metric(label=f"Total {cat}", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")            
+            st.metric(label=f"Total {cat}", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
+            
             if st.button("❌ Cerrar vista actual"):
                 st.session_state.cat_seleccionada = None
                 st.rerun()
