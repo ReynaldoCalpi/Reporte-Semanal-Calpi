@@ -1,7 +1,34 @@
 import streamlit as st
 import pandas as pd
 import os
-
+# --- CAPA DE ADMINISTRACIÓN DE FORMATOS ---
+# Si no está aquí, el sistema usará las columnas que tengan datos.
+CONFIG_ADMIN = {
+    "DISPONIBILIDAD": ["BANCO", "DESCRIPCION", "NUMERO DE CUENTA", "$$"],
+    "PRESTAMOS A TERCEROS": ["NOMBRE", "PARTICIPACION EN EL PRESTAMO", "$$"],
+    "TERRENOS PREDIO CALPI": ["MATRICULA", "TERRENOS", "$$"],
+    "CUENTAS POR COBRAR GT": ["FECHA", "CLIENTE","DOCUMENTO", "$$"],
+    "CONTRUCCIONES PREDIO CALPI OFICINAS": ["AREA", "$$"],
+    "CUENTAS POR COBRAR HN": ["FECHA", "CLIENTE","DOCUMENTO", "$$"],
+    "CUENTAS POR COBRAR NI": ["FECHA", "CLIENTE","DOCUMENTO", "$$"],
+    "CUENTAS POR COBRAR SV": ["CLIENTE","$$"],
+    "DIESEL EN EQUIPOS Y ALMACENAMIENTOS": ["TIPO", "COSTO GALON DE DIESEL", "$$"],
+    "EQUIPOS DE TRANNSPORTE": ["TIPO", "MARCA", "PLACA", "$$"],
+    "EQUIPOS DE TRANSPORTE EN TRAMITE": ["MARCA", "VIN", "POLIZA", "$$"],
+    "EQUIPOS DE TRANSPORTE EN TRANSITO": ["TIPO", "MARCA", "VIN.1", "$$"],
+    "MOBILIARIO Y EQUIPO DE OFICINA": ["CODIGO", "DESCRIPCION.1", "UBICACIÓN FISICA", "$$"],
+    "OTROS TERRENOS Y PROPIEDADES": ["OTROS TERRENOS Y PROPIEDADES", "$$"],
+    "PENDIENTES DE FACTURAR": ["FECHA", "CLIENTE", "$$"],
+    "PROYECTOS CALPI": ["NOMBRE", "$$"],
+    "PRESTAMOS ROTATIVOS Y DECRECIENTES": ["BANCO", "PLAZO", "CONTRATADA", "DISPONIBLE", "TASA NOMINAL", "TASA EFECTIVA", "VENCE", "TIPO GARANTIA", "$$"],
+    "CUENTAS POR PAGAR SV COMBUSTIBLE": ["FECHA", "DOCUMENTO", "PROVEEDOR", "$$"],
+    "CUENTAS POR PAGAR SV": ["FECHA", "DOCUMENTO", "PROVEEDOR", "QUEDAN", "$$"],
+    "GASTOS MENSUALES EL SALVADOR": ["Tipo", "Pais", "Gasto", "$$"],
+    "GASTOS ANUALES EL SALVADOR": ["Tipo", "Pais", "Gastos", "$$"],
+    "GASTOS POR PAIS Y OBLIGACIONES": ["Gastos", "Pais", "Tipo.1", "$$"],
+    "TRANSPORTES AGREGADOS": ["fecha", "documento", "transporte", "$$"],
+    # Agrega tantas categorías como quieras aquí
+}
 # 1. Configuración principal de la página web
 st.set_page_config(page_title="Dashboard Financiero Calpi", layout="wide")
 
@@ -150,46 +177,36 @@ else:
             st.metric("DIFERENCIA ENTRE ACTIVOS Y PASIVOS", f"$ {patrimonio:,.2f}")
 
     # ==========================================
-    # LADO DERECHO: DETALLE DINÁMICO
+    # LADO DERECHO: LÓGICA ADMINISTRABLE
     # ==========================================
     with col_derecha:
-        st.header("📑 Detalle por Rubro")
+        # ... (Tu header y control de selección inicial) ...
         
-        if st.session_state.cat_seleccionada is None:
-            st.info("👈 Selecciona una cuenta en la izquierda para ver el detalle.")
-        else:
-            cat = st.session_state.cat_seleccionada
-            st.subheader(f"🔹 Detalle: {cat}")
+        # 1. Obtenemos columnas definidas en el ADMIN, si no existen, usamos todas
+        columnas_resumen_vista = CONFIG_ADMIN.get(cat, cols_existentes)
+        
+        # 2. Filtrado inteligente de columnas vacías (para no mostrar basura)
+        # Solo conservamos columnas que tienen al menos un dato, 
+        # PERO mantenemos las definidas en el CONFIG_ADMIN aunque estén vacías (por si quieres ver el campo vacío)
+        columnas_finales = [
+            c for c in columnas_resumen_vista 
+            if c in df_cajon.columns and (c in CONFIG_ADMIN.get(cat, []) or df_cajon[c].notna().any())
+        ]
+        
+        # 3. Anclaje de Dinero (La columna $$ siempre al final)
+        if col_dinero in columnas_finales:
+            columnas_finales.remove(col_dinero)
+            columnas_finales.append(col_dinero)
             
-            # 1. Preparación de datos
-            df_cajon = df_master[df_master['Categoria'] == cat].copy()
-            cols_existentes = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
-            
-            # --- INICIALIZACIÓN DE FORMATOS (Aquí corregimos el NameError) ---
-            formatos_columnas = {} 
-            col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
-            
-            for c in cols_existentes:
-                c_low = str(c).lower()
-                if "$$" in c_low or any(k in c_low for k in ['contratado', 'disponible', 'monto', 'saldo', 'valor']):
-                    df_cajon[c] = pd.to_numeric(df_cajon[c], errors='coerce').fillna(0)
-                    formatos_columnas[c] = st.column_config.NumberColumn(format="$ %,.2f")
-            
-            # --- 2. TUS REGLAS IF/ELIF ---
-            # (Pega aquí tu lógica de columnas_resumen_vista)
-            cat_str = str(cat).upper().strip()
-            columnas_resumen_vista = []
-            # ... [TUS REGLAS AQUÍ] ...
-
-            # 3. SEGURIDAD: Si no hay reglas, mostramos las que tienen datos
-            if not columnas_resumen_vista:
-                columnas_resumen_vista = [c for c in cols_existentes if df_cajon[c].notna().any()]
-
-            # 4. ORDEN: Dinero al final de las visibles
-            if col_dinero and col_dinero in columnas_resumen_vista:
-                columnas_resumen_vista.remove(col_dinero)
-            if col_dinero:
-                columnas_resumen_vista.append(col_dinero)
+        # 4. Renderizado Final
+        if columnas_finales:
+            st.dataframe(
+                df_cajon[columnas_finales], 
+                hide_index=True, 
+                use_container_width=True,
+                column_config=formatos_columnas
+            )
+        # ... (Resto del código) ...
 
             # 5. RENDERIZADO FINAL
             columnas_finales = [c for c in columnas_resumen_vista if c in df_cajon.columns]
