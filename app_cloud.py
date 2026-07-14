@@ -67,7 +67,7 @@ st.sidebar.image("https://raw.githubusercontent.com/ReynaldoCalpi/Reporte-Semana
 st.sidebar.header("Panel de Sugerencias")
 
 st.sidebar.markdown("---")
-st.sidebar.info("💡Por Favor utilizar el espacio de observaciones bajo cada rubro, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
+st.sidebar.info("💡Por Favor utilizar el espacio de observaciones *CLIC en Guardar Nota* bajo cada rubro, sugerencias y mejoras y poder evacuarlas en proximas entregas.")
 if "notas_calpi" not in st.session_state:
     st.session_state.notas_calpi = []
 
