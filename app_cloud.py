@@ -248,14 +248,6 @@ else:
                     # Si no es numérica, aseguramos que sea string para evitar errores
                     df_cajon[col] = df_cajon[col].astype(str).replace('nan', '')
             
-            # 6. Renderizado final
-            if columnas_finales:
-                st.dataframe(
-                    df_cajon[columnas_finales], 
-                    hide_index=True, 
-                    use_container_width=True,
-                    column_config=formatos_columnas
-                )
             # ... (el resto de tu código) ...
             # --- Visualización ---
             if columnas_finales:
