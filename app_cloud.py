@@ -5,6 +5,10 @@ import os
 # 1. Configuración principal de la página web
 st.set_page_config(page_title="Dashboard Financiero Calpi", layout="wide")
 
+# --- INICIALIZAR ESTADO DE NAVEGACIÓN ---
+if 'cat_seleccionada' not in st.session_state:
+    st.session_state.cat_seleccionada = None
+
 # Rutas de trabajo fijas
 CARPETA = r'https://docs.google.com/spreadsheets/d/1ozc9yAbVZ3vEhjJEOuQd2D14vhFd7JFSf6D8Jr2R-OQ/edit?gid=0#gid=0'
 ARCHIVO_SALIDA = 'Reporte_Consolidado_Final.xlsx'
@@ -110,47 +114,36 @@ else:
     # ==========================================
     # EXTREMO IZQUIERDO: SECCIÓN FINANCIERA
     # ==========================================
+    # ==========================================
+    # EXTREMO IZQUIERDO: MENÚ DE NAVEGACIÓN
+    # ==========================================
     with col_izquierda:
         st.header("📋 Resumen Consolidado")
         
+        # --- ACTIVOS ---
         with st.container(border=True):
             st.subheader("🟢 Activos")
-            datos_activos = [{"Cuenta Contable": cat, "Saldo": totales_por_categoria.get(cat, 0.0)} for cat in lista_activos if totales_por_categoria.get(cat, 0.0) != 0]
-            
-            if datos_activos:
-                df_activos = pd.DataFrame(datos_activos)
-                st.dataframe(
-                    df_activos, 
-                    hide_index=True, 
-                    use_container_width=True,
-                    column_config={
-                        "Cuenta Contable": st.column_config.TextColumn("Cuenta Contable"),
-                        "Saldo": st.column_config.NumberColumn("Saldo", format="$ %,.2f")
-                    }
-                )
+            for cat in lista_activos:
+                saldo = totales_por_categoria.get(cat, 0.0)
+                if saldo != 0:
+                    if st.button(f"{cat}\n${saldo:,.2f}", use_container_width=True, key=f"btn_{cat}"):
+                        st.session_state.cat_seleccionada = cat
             
             total_activos = sum(totales_por_categoria.get(cat, 0.0) for cat in lista_activos)
-            st.metric("DISPONIBILIDAD BANCARIA Y ACTIVOS REALIZABLES", f"$ {total_activos:,.2f}")
+            st.metric("TOTAL ACTIVOS", f"$ {total_activos:,.2f}")
         
+        # --- PASIVOS ---
         with st.container(border=True):
             st.subheader("🔴 Pasivos")
-            datos_pasivos = [{"Cuenta Contable": cat, "Saldo": totales_por_categoria.get(cat, 0.0)} for cat in lista_pasivos if totales_por_categoria.get(cat, 0.0) != 0]
-            
-            if datos_pasivos:
-                df_pasivos = pd.DataFrame(datos_pasivos)
-                st.dataframe(
-                    df_pasivos, 
-                    hide_index=True, 
-                    use_container_width=True,
-                    column_config={
-                        "Cuenta Contable": st.column_config.TextColumn("Cuenta Contable"),
-                        "Saldo": st.column_config.NumberColumn("Saldo", format="$ %,.2f")
-                    }
-                )
+            for cat in lista_pasivos:
+                saldo = totales_por_categoria.get(cat, 0.0)
+                if saldo != 0:
+                    if st.button(f"{cat}\n${saldo:,.2f}", use_container_width=True, key=f"btn_{cat}"):
+                        st.session_state.cat_seleccionada = cat
                 
             total_pasivos = sum(totales_por_categoria.get(cat, 0.0) for cat in lista_pasivos)
-            st.metric("PASIVOS Y DEUDAS A CORTO Y LARGO PLAZO", f"$ {total_pasivos:,.2f}")
-        
+            st.metric("TOTAL PASIVOS", f"$ {total_pasivos:,.2f}")        
+      
         with st.container(border=True):
             st.subheader("🔵 Patrimonio Consolidado")
             patrimonio = total_activos - total_pasivos
@@ -159,47 +152,28 @@ else:
     # ==========================================
     # LADO DERECHO: DETALLES DE CAJONES LIMPIOS
     # ==========================================
+    # ==========================================
+    # LADO DERECHO: DETALLE DINÁMICO
+    # ==========================================
     with col_derecha:
         st.header("📑 Detalle por Rubro")
         
-        # Definimos el orden de prioridad
-        orden_prioridad = [
-            "Disponibilidad", "Prestamos a Terceros", "Terrenos Predio Calpi", 
-            "Cuentas por Cobrar GT", "Contrucciones Predio Calpi Oficinas", 
-            "Cuentas por Cobrar HN", "Cuentas por Cobrar NI", "Cuentas por Cobrar SV", 
-            "Diesel en Equipos y Almacenamientos", "Equipos de Trannsporte", 
-            "Equipos de Transporte en Tramite", "Equipos de Transporte en Transito", 
-            "Gastos Anuales El Salvador", "Mobiliario y Equipo de oficina", 
-            "Otros Terrenos y Propiedades", "Pendientes de Facturar", 
-            "Prestamos Rotativos y Decrecientes", "Proyectos Calpi", 
-            "Cuentas por Pagar SV Combustible", "Cuentas por Pagar SV", 
-            "Gastos Mensuales El Salvador", "Gastos por Pais y Obligaciones", 
-            "Transportes Agregados"
-        ]
-
-        def obtener_prioridad(cat):
-            for i, prefijo in enumerate(orden_prioridad):
-                if prefijo.upper() in cat.upper():
-                    return i
-            return 99
-
-        categorias_ordenadas = sorted(categorias_disponibles, key=obtener_prioridad)
-        
-        # EL FOR DEBE ESTAR ALINEADO IGUAL QUE LAS LÍNEAS DE ARRIBA
-        for cat in categorias_ordenadas:
-            with st.container(border=True):
-                st.subheader(f"🔹 {cat}")
-                
-                df_cajon = df_master[df_master['Categoria'] == cat].copy()
-                cols_finales = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
-                
-                # Formateador de monedas ($$) inteligente
-                formatos_columnas = {}
-                for c in cols_finales:
-                    c_low = str(c).lower()
-                    if "$$" in c_low or any(k in c_low for k in ['contratado', 'disponible', 'monto', 'saldo', 'valor']):
-                        df_cajon[c] = pd.to_numeric(df_cajon[c], errors='coerce').fillna(0)
-                        formatos_columnas[c] = st.column_config.NumberColumn(format="$ %,.2f")
+        if st.session_state.cat_seleccionada is None:
+            st.info("👈 Por favor, selecciona una cuenta en el panel de la izquierda para ver el detalle detallado.")
+        else:
+            cat = st.session_state.cat_seleccionada
+            st.subheader(f"🔹 Detalle: {cat}")
+            
+            # --- Lógica de filtrado y visualización (lo que ya tenías) ---
+            df_cajon = df_master[df_master['Categoria'] == cat].copy()
+            # ... (Aquí va toda la lógica que ya tenías de formatos_columnas, limpieza, y reglas de negocio IF/ELIF) ...
+            
+            # (Asegúrate de mantener tu bloque de 'columnas_resumen_vista' y el 'st.dataframe' dentro de este bloque ELSE)
+            
+            # Botón para limpiar selección
+            if st.button("❌ Cerrar vista actual"):
+                st.session_state.cat_seleccionada = None
+                st.rerun()
                 
                 # --- LIMPIEZA PROFUNDA DE "NONE" Y NULOS ---
                 df_cajon_limpio = df_cajon.copy()
