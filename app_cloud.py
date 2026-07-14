@@ -158,20 +158,22 @@ else:
     # ==========================================
     # LADO DERECHO: DETALLE DINÁMICO
     # ==========================================
+    # ==========================================
+    # LADO DERECHO: DETALLE DINÁMICO
+    # ==========================================
     with col_derecha:
         st.header("📑 Detalle por Rubro")
         
         if st.session_state.cat_seleccionada is None:
-            st.info("👈 Por favor, selecciona una cuenta en el panel de la izquierda para ver el detalle.")
+            st.info("👈 Selecciona una cuenta en la izquierda para ver el detalle.")
         else:
             cat = st.session_state.cat_seleccionada
             st.subheader(f"🔹 Detalle: {cat}")
             
-            # --- AQUÍ VA LA LÓGICA DE DIBUJO ---
+            # --- 1. PREPARACIÓN DE DATOS ---
             df_cajon = df_master[df_master['Categoria'] == cat].copy()
             cols_finales = [c for c in df_cajon.columns if c not in ['Origen', 'Categoria']]
             
-            # Formateador de monedas
             formatos_columnas = {}
             for c in cols_finales:
                 c_low = str(c).lower()
@@ -179,7 +181,6 @@ else:
                     df_cajon[c] = pd.to_numeric(df_cajon[c], errors='coerce').fillna(0)
                     formatos_columnas[c] = st.column_config.NumberColumn(format="$ %,.2f")
             
-            # Limpieza
             df_cajon_limpio = df_cajon.copy()
             for col in df_cajon_limpio.columns:
                 if df_cajon_limpio[col].dtype == object:
@@ -187,14 +188,30 @@ else:
             df_cajon_limpio = df_cajon_limpio.dropna(axis=1, how='all')
             cols_existentes = list(df_cajon_limpio.columns)
             col_dinero = next((col for col in cols_existentes if "$$" in str(col)), None)
-            
-            # (Aquí irían tus reglas IF / ELIF de las columnas, asegúrate de mantenerlas dentro de este ELSE)
-            # ... [Copia aquí tus bloques IF "CONTRUCCIONES" ... hasta el ELSE final] ...
-            
-            # Asegúrate de terminar con el st.dataframe como lo tenías:
-            # st.dataframe(df_cajon_limpio[columnas_seguras_vista], ...)
-            # st.metric(...)
+            if col_dinero: df_cajon_limpio = df_cajon_limpio.dropna(subset=[col_dinero])
 
+            # --- 2. LÓGICA DE COLUMNAS (Tus reglas) ---
+            # (Aquí pegaste tus reglas IF/ELIF antes, ASEGÚRATE QUE ESTÉN AQUÍ ADENTRO)
+            # Ejemplo simplificado de lo que debe ir aquí:
+            cat_str = str(cat).upper().strip()
+            columnas_resumen_vista = []
+            
+            # [PEGA AQUÍ TODOS TUS IF/ELIF DE REGLAS DE COLUMNAS QUE YA TENÍAS]
+            # ... asegúrate de que columnas_resumen_vista se llene correctamente ...
+            
+            # --- 3. DIBUJAR TABLA Y METRIC ---
+            columnas_seguras_vista = [c for c in columnas_resumen_vista if c in df_cajon_limpio.columns]
+            
+            if columnas_seguras_vista:
+                st.dataframe(
+                    df_cajon_limpio[columnas_seguras_vista], 
+                    hide_index=True, 
+                    use_container_width=True,
+                    column_config=formatos_columnas
+                )
+            
+            st.metric(label=f"Total acumulado en {cat}", value=f"$ {totales_por_categoria.get(cat, 0.0):,.2f}")
+            
             # Botón cerrar
             if st.button("❌ Cerrar vista actual"):
                 st.session_state.cat_seleccionada = None
